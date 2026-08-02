@@ -1,0 +1,17 @@
+# 数据集：从 Kaggle 或 aclImdb 重建，不入库
+data/
+*.tsv
+*.tsv.zip
+
+# 训练产物
+models/
+submissions/
+*.csv
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ipynb_checkpoints/
+.venv/
+venv/

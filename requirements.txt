@@ -1,0 +1,15 @@
+# Part 1 / 3 / 4：特征提取与分类
+numpy>=1.26
+pandas>=2.0
+scikit-learn>=1.3
+scipy>=1.11
+
+# Part 2：Word2Vec 词向量
+gensim>=4.3
+
+# 可视化与 Notebook
+matplotlib>=3.8
+jupyterlab>=4.0
+
+# 测试
+pytest>=8.0
