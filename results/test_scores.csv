@@ -1,11 +1,2 @@
 model,test_acc,test_auc
 roberta,0.9371,0.9835
-bert,0.919,0.9757
-distilbert,0.9112,0.9712
-attention_lstm,0.9026,0.965
-capsule_lstm,0.9036,0.9648
-cnnlstm,0.8997,0.9637
-gru,0.8986,0.963
-lstm,0.8975,0.9629
-cnn,0.8858,0.9579
-transformer,0.8814,0.954

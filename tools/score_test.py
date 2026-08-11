@@ -18,6 +18,7 @@ from __future__ import annotations
 import argparse
 import csv
 import importlib
+import re
 import sys
 from pathlib import Path
 
@@ -43,6 +44,19 @@ GLOVE_MODELS = {
 HF_MODELS = ("distilbert", "bert", "roberta")
 
 
+_WHITESPACE = re.compile(r"\s+")
+
+
+def _normalize(text: str) -> str:
+    """把两种来源的同一条评论归一到可比形式。
+
+    官方 Kaggle 文件用 `\\"` 转义正文里的引号、整个字段两端还带引号；
+    我们从 aclImdb 重建时压平了空白。不做这个归一化，
+    直接比字符串会有近一半「对不上」，看起来像是两批不同的数据。
+    """
+    return _WHITESPACE.sub(" ", str(text).replace('\\"', '"')).strip().strip('"')
+
+
 def load_test_frame() -> tuple[pd.DataFrame, pd.Series | None]:
     """读测试集。有 testDataWithLabels.tsv 就顺带返回真实标签。"""
     test = pd.read_csv(common.CORPUS_DIR / "testData.tsv", header=0,
@@ -52,14 +66,25 @@ def load_test_frame() -> tuple[pd.DataFrame, pd.Series | None]:
         return test, None
 
     labelled = pd.read_csv(labelled_path, header=0, delimiter="\t", quoting=csv.QUOTE_NONE)
-    # 按 id 对齐，不依赖行顺序——换成 Kaggle 官方 testData.tsv 后顺序会不同
+
+    # 先按 id 对齐。官方 testData.tsv 的 id 形如 "12311_10"（带引号），
+    # 和我们从 aclImdb 重建的 0_2 完全不同，这时 id 对不上是预期的。
     merged = test[["id"]].merge(labelled[["id", "sentiment"]], on="id", how="left")
-    if merged["sentiment"].isna().any():
-        missing = int(merged["sentiment"].isna().sum())
-        print(f"⚠ {missing} 条 id 在 testDataWithLabels.tsv 里找不到，跳过本地打分。"
-              "（用 Kaggle 官方 testData.tsv 时这是正常的）")
+    if not merged["sentiment"].isna().any():
+        return test, merged["sentiment"].astype(int)
+
+    # id 对不上就退回按正文对齐。官方文件把内部引号转义成 \"，
+    # 而 aclImdb 原文里是裸引号，所以必须先反转义再比——否则近半数会对不上。
+    print("  id 与 testDataWithLabels.tsv 不匹配，改按评论正文对齐")
+    truth = test[["review"]].assign(key=test["review"].map(_normalize)).merge(
+        labelled.assign(key=labelled["review"].map(_normalize))[["key", "sentiment"]]
+        .drop_duplicates("key"), on="key", how="left")
+    matched = int(truth["sentiment"].notna().sum())
+    print(f"  正文对齐成功 {matched:,} / {len(test):,} 条")
+    if matched < 0.95 * len(test):
+        print("  ⚠ 对齐率过低，跳过本地打分，只生成提交文件")
         return test, None
-    return test, merged["sentiment"].astype(int)
+    return test, truth["sentiment"]
 
 
 def glove_probabilities(name: str, bundle: common.Bundle, test: pd.DataFrame,
@@ -68,13 +93,13 @@ def glove_probabilities(name: str, bundle: common.Bundle, test: pd.DataFrame,
     model = module.SentimentNet(bundle.weight)
     common.load_best(name, model, device)
 
-    # pickle 里的 test_features 是按当前 corpus/imdb/testData.tsv 编码的。
-    # 行数一致就直接用，否则重新编码（换成 Kaggle 官方文件的情况）。
-    if len(bundle.test_features) == len(test):
-        features = bundle.test_features
-    else:
-        print("  测试集行数与 pickle 不一致，按当前 TSV 重新编码")
-        features = common.encode_texts(test["review"].tolist(), bundle.word_to_idx)
+    # 一律按当前 TSV 重新编码，不复用 pickle 里的 test_features。
+    #
+    # 这一点很容易踩坑：Kaggle 官方 testData.tsv 和我们从 aclImdb 重建的那份
+    # **行数都是 25,000，但行顺序完全不同**。如果只用行数是否相等来决定
+    # 「复用 pickle」，换成官方文件后就会拿 A 的预测配 B 的 id——
+    # 提交文件看起来完全正常，分数却等于随机。重新编码只多花几秒。
+    features = common.encode_texts(test["review"].tolist(), bundle.word_to_idx)
 
     logits = common.predict_logits(model, features, device)
     return torch.softmax(logits, dim=1)[:, 1].numpy()
