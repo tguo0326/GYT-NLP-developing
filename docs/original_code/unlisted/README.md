@@ -6,7 +6,7 @@
 
 | 文件 | 内容 | 已知问题 |
 |---|---|---|
-| `imdb_bert_native.py` | 不用 HF Trainer，手写 BERT 微调循环 | 写死 `.cuda()`；旧版 transformers API |
+| ` imdb_bert_native.py` | 不用 HF Trainer，手写 BERT 微调循环 | 写死 `.cuda()`；旧版 transformers API |
 | `imdb_bert_scratch.py` | 从零实现 BERT 的部分组件 | 同上，且未接通 IMDB 数据 |
 | `imdb_distilbert_native.py` | 手写 DistilBERT 微调循环 | 同上 |
 

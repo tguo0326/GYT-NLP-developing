@@ -24,17 +24,20 @@
 > 文本表示方法（词频 → 静态词向量 → 上下文词向量）和模型结构（线性 → CNN → RNN →
 > Attention → Transformer）各自贡献了多少准确率？代价是多少参数和多少训练时间？
 
+**一句话结论**：准确率的三级台阶 **0.83（词频）→ 0.89（GloVe / TF-IDF）→ 0.93（BERT 系）**
+全部来自文本表示的换代；同一级里换模型结构只在 0.6 个百分点内浮动。
+
 具体分两个阶段：
 
-**阶段一 · Kaggle 入门教程复现**（`src/`、`notebooks/`）
-Kaggle [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/competitions/word2vec-nlp-tutorial)
-的 Python 3 完整复现。原教程写于 2014 年、基于 Python 2.7，代码在今天的环境里
-已经跑不起来（`print` 语句、`sklearn.cross_validation`、gensim 3.x API 全部失效）。
+| | 内容 | 代码位置 |
+|---|---|---|
+| **阶段一** | Kaggle 入门教程的 Python 3 复现：Bag of Words / 自训 Word2Vec / 文档向量 / TF-IDF | `kaggle_tutorial/`、`notebooks/` |
+| **阶段二** | GloVe 840B.300d + CNN / LSTM / GRU / CNN-LSTM / Attention-LSTM / Transformer / Capsule-LSTM，以及 BERT / DistilBERT / RoBERTa 微调 | 根目录 `imdb_*.py` |
 
-**阶段二 · GloVe + 深度学习模型**（根目录 `imdb_*.py`）
-用 Stanford GloVe 840B.300d 预训练词向量，训练 CNN / LSTM / GRU / CNN-LSTM /
-Attention-LSTM / Transformer / Capsule-LSTM，以及微调 BERT / DistilBERT / RoBERTa，
-统一记录准确率、训练时间和参数量。
+阶段一对应的原教程写于 2014 年、基于 Python 2.7，代码在今天的环境里已经跑不起来
+（`print` 语句、`sklearn.cross_validation`、gensim 3.x API 全部失效）。
+阶段二的原始代码有 5 处**不报错但训不出来**的错误，
+见[遇到的问题及解决办法](#遇到的问题及解决办法)。
 
 ```mermaid
 flowchart LR
@@ -186,7 +189,7 @@ results/roberta_submission.csv        ← 最好的模型，AUC 0.9834
 | Part 3-B · Word2Vec 语义簇计数 + 随机森林 | 3,298 | 0.8292 | 0.9070 |
 | Part 4 · TF-IDF (1-2gram) + 逻辑回归 | 200,000 | **0.8918** | **0.9576** |
 
-> 阶段一用的是 `src/imdb.py` 的清洗流程（**去停用词**），阶段二为了和神经网络保持
+> 阶段一用的是 `kaggle_tutorial/imdb.py` 的清洗流程（**去停用词**），阶段二为了和神经网络保持
 > 完全一致而用 `common.review_to_wordlist`（**不去停用词**）。所以对比表里的
 > `bow_rf` = 0.8254 与这里的 Part 1 = 0.8394 有差距，差异来自停用词处理，
 > 不是实现不同。详见 [`docs/results.md`](docs/results.md)。
@@ -293,52 +296,84 @@ king - man + woman → queen(0.775), prince(0.612), princess(0.602)
 
 三种表示方法的区别见 [`docs/glove-word2vec-bow.md`](docs/glove-word2vec-bow.md)。
 
-## 文件放置位置
+## 仓库结构
+
+结构上分四类：**根目录是运行入口**，`kaggle_tutorial/` 是阶段一，
+中间四个目录是你要手动放数据的地方，剩下的是支撑代码与文档。
 
 ```text
 GYT-NLP-developing/
-├── corpus/imdb/                    # ← 放数据（.gitignore）
-│   ├── labeledTrainData.tsv
-│   ├── testData.tsv
-│   └── unlabeledTrainData.tsv
-├── glove/                          # ← 放词向量（.gitignore）
-│   ├── glove.840B.300d.zip           · 下载的原始压缩包
-│   ├── glove.840B.300d.txt           · 解压产物（转换完可删）
-│   ├── glove.840B.300d.kv            · Gensim 原生格式
-│   └── glove.840B.300d.kv.vectors.npy
-├── pickle/imdb_glove.pickle3       # ← 预处理产物（.gitignore，312 MB）
-├── models/                         # ← 最佳模型权重（.gitignore）
-├── logs/                           # ← 训练日志（.gitignore）
-├── results/                        # ← 对比表、history、提交文件
 │
-├── common.py                       # 所有模型共用的训练基础设施
-├── hf_trainer.py                   # BERT 系微调的共用实现
-├── imdb_process.py                 # 数据预处理 → pickle
-├── imdb_bow_baseline.py            # 传统分类器基线
-├── imdb_cnn.py  imdb_lstm.py  imdb_gru.py
-├── imdb_cnnlstm.py  imdb_attention_lstm.py
-├── imdb_transformer.py  imdb_capsule_lstm.py
-├── imdb_bert_trainer.py  imdb_distilbert_trainer.py  imdb_roberta_trainer.py
+├─ ① 运行入口（阶段二，直接 python xxx.py 跑）
+│   ├── imdb_process.py                 数据预处理 → pickle
+│   ├── imdb_bow_baseline.py            传统分类器基线（BoW / TF-IDF）
+│   ├── imdb_cnn.py                     ┐
+│   ├── imdb_lstm.py                    │
+│   ├── imdb_gru.py                     ├ GloVe + 神经网络（任务 7-11）
+│   ├── imdb_cnnlstm.py                 │
+│   ├── imdb_attention_lstm.py          │
+│   ├── imdb_transformer.py             │
+│   ├── imdb_capsule_lstm.py            ┘
+│   ├── imdb_bert_trainer.py            ┐
+│   ├── imdb_distilbert_trainer.py      ├ 预训练模型微调（任务 11）
+│   ├── imdb_roberta_trainer.py         ┘
+│   ├── common.py                       ★ 所有模型共用的训练框架
+│   └── hf_trainer.py                   ★ BERT 系微调的共用实现
 │
-├── src/                            # 阶段一：Kaggle 教程 Python 3 复现
-├── notebooks/                      # 阶段一：可直接导入 Kaggle
-├── tools/
-│   ├── check_imdb_data.py          # 数据体检
-│   ├── prepare_glove.py            # GloVe 转换 + 自检
-│   ├── make_local_dataset.py       # 从 aclImdb 重建竞赛格式数据
-│   ├── collect_results.py          # 汇总 results/*_summary.json → 对比表
-│   └── build_notebooks.py
-├── docs/
-│   ├── glove-word2vec-bow.md       # GloVe / Word2Vec / BoW 的区别
-│   ├── troubleshooting.md          # 遇到的问题及解决办法（24 条）
-│   ├── learning-summary.md         # 学习总结
-│   ├── results.md                  # 阶段一完整实测数据
-│   ├── from-bow-to-llm.md          # 概念脉络：One-Hot → BoW → Word2Vec → LLM
-│   ├── kaggle-gpu.md               # Kaggle 免费算力笔记
-│   └── original_code/              # 压缩包里的原始脚本（未修改，备查）
-├── extras/                         # 不在任务清单里的原始脚本（未修改）
-└── tests/                          # pytest：清洗逻辑 + 模型前向
+├─ ② 需要你手动放东西的目录（全部 .gitignore）
+│   ├── corpus/imdb/                    ← IMDB 数据
+│   │   ├── labeledTrainData.tsv          25,000 条带标签
+│   │   ├── testData.tsv                  25,000 条待预测
+│   │   ├── unlabeledTrainData.tsv        50,000 条无标签
+│   │   └── sampleSubmission.csv          官方提交样例
+│   ├── glove/                          ← GloVe 词向量
+│   │   ├── glove.840B.300d.zip           下载的原始压缩包（2.1 GB）
+│   │   ├── glove.840B.300d.txt           解压产物（5.3 GB，转换完可删）
+│   │   ├── glove.840B.300d.kv            Gensim 原生格式
+│   │   └── glove.840B.300d.kv.vectors.npy
+│   ├── pickle/imdb_glove.pickle3       预处理产物（312 MB，自动生成）
+│   └── models/                         最佳模型权重（1.5 GB，自动生成）
+│
+├─ ③ 产出（results/ 入库，logs/ 也入库）
+│   ├── results/
+│   │   ├── comparison.md                 统一对比表 + 四项结论
+│   │   ├── test_scores.csv               官方测试集的准确率与 AUC
+│   │   ├── <model>_summary.json          准确率、参数量、训练时间
+│   │   ├── <model>_history.csv           逐 epoch 的 loss 与 accuracy
+│   │   ├── <model>_submission.csv        Kaggle 提交文件（官方 id + 概率）
+│   │   └── attention_lstm_attention.json 注意力权重
+│   └── logs/<model>.log                  13 份训练日志
+│
+└─ ④ 支撑代码与文档
+    ├── kaggle_tutorial/                阶段一：Kaggle 教程的 Python 3 复现
+    │   ├── imdb.py                       数据加载与文本清洗（Part 1-4 共用）
+    │   └── part1~part4_*.py              BoW / Word2Vec / 文档向量 / TF-IDF
+    ├── notebooks/                      阶段一：可直接导入 Kaggle 的 Notebook
+    ├── tools/
+    │   ├── check_imdb_data.py            数据体检（任务 3）
+    │   ├── prepare_glove.py              GloVe 转换 + 自检（任务 4）
+    │   ├── score_test.py                 测试集打分 + 生成提交文件
+    │   ├── collect_results.py            汇总 → 对比表（任务 12）
+    │   ├── make_local_dataset.py         从 aclImdb 重建竞赛格式数据
+    │   └── build_notebooks.py
+    ├── tests/                          pytest 37 项（不需要 GPU，2.8 秒）
+    │   ├── test_imdb.py                  阶段一的清洗逻辑
+    │   └── test_models.py                12 个模型的前向与语义不变量
+    └── docs/
+        ├── troubleshooting.md            遇到的问题及解决办法（24 条）
+        ├── learning-summary.md           学习总结
+        ├── glove-word2vec-bow.md         三种文本表示方法的区别
+        ├── results.md                    阶段一完整实测数据
+        ├── from-bow-to-llm.md            概念脉络：One-Hot → BoW → Word2Vec → LLM
+        ├── kaggle-gpu.md                 Kaggle 免费算力笔记
+        └── original_code/                压缩包里的原始脚本（未修改，用于对照）
+            └── unlisted/                 不在任务清单里的 3 个脚本
 ```
+
+**为什么模型脚本放在根目录而不是收进子包**：任务清单要求的运行命令就是
+`python imdb_cnn.py`。收进 `models/` 之类的子目录会让命令变成
+`python models/imdb_cnn.py`，和清单不一致。所以根目录只放**运行入口**，
+其余一律进子目录。
 
 ## 完整运行顺序
 
@@ -373,11 +408,14 @@ python imdb_bert_trainer.py
 python imdb_roberta_trainer.py
 
 # ── 7. 汇总 ──────────────────────────────────────────────
-python tools/collect_results.py              # → results/comparison.md
+python tools/score_test.py --model all       # 测试集打分 + 生成提交文件
+python tools/collect_results.py              # → results/comparison.md，并同步进 README
 python -m pytest tests/ -q                   # 37 项测试
 ```
 
-每个脚本跑完会产出四样东西：
+在 Tesla T4 上跑完全部 12 个模型约 **75 分钟**（不含 GloVe 下载与转换的约 25 分钟）。
+
+每个模型脚本跑完会产出五样东西：
 
 | 产物 | 位置 |
 |---|---|
@@ -385,7 +423,7 @@ python -m pytest tests/ -q                   # 37 项测试
 | 逐 epoch 指标 CSV | `results/<name>_history.csv` |
 | 汇总 JSON（准确率、参数量、训练时间） | `results/<name>_summary.json` |
 | 最佳模型权重（按验证准确率） | `models/<name>_best.pt` |
-| Kaggle 提交文件 | `results/<name>_submission.csv` |
+| Kaggle 提交文件（官方 id + 正面概率） | `results/<name>_submission.csv` |
 
 ## 每个模型的运行命令
 
@@ -478,7 +516,9 @@ python -m pytest tests/ -v
 - 三个 BERT 脚本原本 `train_test_split` 连 `random_state` 都没有，每次划分都不同，
   跨模型完全不可比。现在全项目统一 `random_state=42, stratify=y`；
 - `read_csv` 必须显式 `quoting=csv.QUOTE_NONE`：影评里全是英文引号，
-  按默认规则解析会**行数正常但内容错位**。
+  按默认规则解析会**行数正常但内容错位**；
+- 比对官方文件和 aclImdb 时必须先还原转义的 `\"`，否则命中率只有 53%，
+  会误判成两批不同的数据（实际是 99.9% 相同）。
 
 ## 关于 Kaggle 免费 GPU
 
@@ -494,7 +534,8 @@ Kaggle 的免费额度（GPU 每周 30 小时、TPU 20 小时，需先完成手�
 
 ## 延伸阅读
 
-- 📊 **[实验结果对比表](results/comparison.md)** —— 自动生成，11 个模型的准确率 / 时间 / 参数量
+- 📊 **[实验结果对比表](results/comparison.md)** —— 自动生成，12 个模型的准确率 / 时间 / 参数量
+- 🎯 **[测试集分数](results/test_scores.csv)** —— 官方 `testData.tsv` 上的准确率与 ROC-AUC
 - 🔤 **[GloVe、Word2Vec 与 Bag of Words 的区别](docs/glove-word2vec-bow.md)** ——
   局部 vs 全局训练目标，以及为什么自训 Word2Vec 打不过词频统计
 - 🛠 **[遇到的问题及解决办法](docs/troubleshooting.md)** —— 24 条，含「不报错但训不出来」的一整类

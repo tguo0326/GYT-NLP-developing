@@ -11,7 +11,7 @@
 average 向量的每一维没有可读的词义，是分布式表示里的一个坐标分量。这正是从
 稀疏离散表示走向稠密 Embedding 的分界点。
 
-    python src/part3_doc_vectors.py --method average
+    python kaggle_tutorial/part3_doc_vectors.py --method average
 """
 
 from __future__ import annotations
@@ -106,7 +106,7 @@ def main() -> None:
     args = parser.parse_args()
 
     if not args.model.exists():
-        raise FileNotFoundError(f"缺少词向量模型 {args.model}，请先运行 src/part2_word2vec.py")
+        raise FileNotFoundError(f"缺少词向量模型 {args.model}，请先运行 kaggle_tutorial/part2_word2vec.py")
 
     data_dir = find_data_dir(args.data_dir)
     train = read_tsv(data_dir, "labeledTrainData")

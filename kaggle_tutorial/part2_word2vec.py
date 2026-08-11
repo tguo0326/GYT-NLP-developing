@@ -7,7 +7,7 @@ Word2Vec 的训练目标不需要人工标签：它用「上下文预测中心�
 「中心词预测上下文」（Skip-gram）构造监督信号，标签直接来自语料本身。这就是
 自监督学习，也是后来 BERT / GPT 系列预训练的同一条思路。
 
-    python src/part2_word2vec.py --output models/word2vec_300d.model
+    python kaggle_tutorial/part2_word2vec.py --output models/word2vec_300d.model
 """
 
 from __future__ import annotations

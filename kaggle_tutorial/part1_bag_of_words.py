@@ -3,7 +3,7 @@
 对应原教程 Part 1。流程：清洗影评 → CountVectorizer 转词频向量 → 随机森林分类
 → 生成 Kaggle 提交文件。
 
-    python src/part1_bag_of_words.py --output submissions/part1_bow.csv
+    python kaggle_tutorial/part1_bag_of_words.py --output submissions/part1_bow.csv
 """
 
 from __future__ import annotations

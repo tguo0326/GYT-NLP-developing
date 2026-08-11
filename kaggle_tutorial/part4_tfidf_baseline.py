@@ -10,7 +10,7 @@
   · 稠密 Embedding 的优势在于迁移能力——同一份词向量可以喂给别的任务，
     而某个数据集上的 TF-IDF 词表不能。这正是预训练范式的起点。
 
-    python src/part4_tfidf_baseline.py
+    python kaggle_tutorial/part4_tfidf_baseline.py
 """
 
 from __future__ import annotations

@@ -47,3 +47,6 @@ __pycache__/
 .venv/
 venv/
 .DS_Store
+
+# 打包给外部的交付产物
+dist/
