@@ -1,0 +1,24 @@
+2026-08-11 08:36:26,872 INFO model=capsule_lstm device=cuda seed=42
+2026-08-11 08:36:26,894 INFO gpu: Tesla T4
+2026-08-11 08:36:26,894 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 08:36:27,610 INFO capsule_lstm: 总参数 30,694,910 / 可训练 868,610
+2026-08-11 08:36:28,356 INFO 参数量: 总计 30,694,910, 可训练 868,610
+2026-08-11 08:36:53,552 INFO epoch  1/10  train_loss 0.4014  train_acc 0.8171  val_loss 0.3070  val_acc 0.8736  25.2s
+2026-08-11 08:36:53,763 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/capsule_lstm_best.pt
+2026-08-11 08:37:18,422 INFO epoch  2/10  train_loss 0.2981  train_acc 0.8791  val_loss 0.3223  val_acc 0.8774  24.7s
+2026-08-11 08:37:18,817 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/capsule_lstm_best.pt
+2026-08-11 08:37:43,605 INFO epoch  3/10  train_loss 0.2661  train_acc 0.8953  val_loss 0.3069  val_acc 0.8734  24.8s
+2026-08-11 08:38:08,502 INFO epoch  4/10  train_loss 0.2474  train_acc 0.9028  val_loss 0.2841  val_acc 0.8882  24.9s
+2026-08-11 08:38:08,911 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/capsule_lstm_best.pt
+2026-08-11 08:38:33,858 INFO epoch  5/10  train_loss 0.2205  train_acc 0.9153  val_loss 0.2694  val_acc 0.8920  24.9s
+2026-08-11 08:38:34,285 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/capsule_lstm_best.pt
+2026-08-11 08:38:59,222 INFO epoch  6/10  train_loss 0.1965  train_acc 0.9280  val_loss 0.2789  val_acc 0.8886  24.9s
+2026-08-11 08:39:24,106 INFO epoch  7/10  train_loss 0.1753  train_acc 0.9373  val_loss 0.3232  val_acc 0.8832  24.9s
+2026-08-11 08:39:49,071 INFO epoch  8/10  train_loss 0.1487  train_acc 0.9485  val_loss 0.3357  val_acc 0.8868  25.0s
+2026-08-11 08:40:13,990 INFO epoch  9/10  train_loss 0.1275  train_acc 0.9580  val_loss 0.4076  val_acc 0.8748  24.9s
+2026-08-11 08:40:38,866 INFO epoch 10/10  train_loss 0.1061  train_acc 0.9671  val_loss 0.3707  val_acc 0.8776  24.9s
+2026-08-11 08:40:38,866 INFO 训练结束：最佳 val_acc 0.8920（epoch 5），总耗时 250.5s
+2026-08-11 08:40:38,974 INFO 已写出 capsule_lstm_history.csv 与 capsule_lstm_summary.json
+2026-08-11 08:40:48,885 INFO 已写出 capsule_lstm_submission.csv（25000 行）
+2026-08-11 08:40:48,895 INFO [positive p=0.9858] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:40:48,896 INFO [negative p=0.0133] A complete waste of time. Terrible script, wooden acting, and the plot made no s

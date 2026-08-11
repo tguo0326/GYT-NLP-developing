@@ -1,0 +1,23 @@
+2026-08-11 08:12:16,817 INFO model=cnnlstm device=cuda seed=42
+2026-08-11 08:12:16,839 INFO gpu: Tesla T4
+2026-08-11 08:12:16,839 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 08:12:17,544 INFO cnnlstm: 总参数 30,140,798 / 可训练 314,498
+2026-08-11 08:12:18,315 INFO 参数量: 总计 30,140,798, 可训练 314,498
+2026-08-11 08:12:25,508 INFO epoch  1/10  train_loss 0.4105  train_acc 0.8072  val_loss 0.3038  val_acc 0.8724  7.2s
+2026-08-11 08:12:25,716 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnnlstm_best.pt
+2026-08-11 08:12:31,860 INFO epoch  2/10  train_loss 0.2887  train_acc 0.8827  val_loss 0.2818  val_acc 0.8838  6.1s
+2026-08-11 08:12:32,293 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnnlstm_best.pt
+2026-08-11 08:12:38,424 INFO epoch  3/10  train_loss 0.2513  train_acc 0.8991  val_loss 0.2939  val_acc 0.8734  6.1s
+2026-08-11 08:12:44,573 INFO epoch  4/10  train_loss 0.2235  train_acc 0.9114  val_loss 0.2764  val_acc 0.8910  6.1s
+2026-08-11 08:12:44,992 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnnlstm_best.pt
+2026-08-11 08:12:51,129 INFO epoch  5/10  train_loss 0.1878  train_acc 0.9302  val_loss 0.2872  val_acc 0.8822  6.1s
+2026-08-11 08:12:57,274 INFO epoch  6/10  train_loss 0.1753  train_acc 0.9341  val_loss 0.3166  val_acc 0.8822  6.1s
+2026-08-11 08:13:03,431 INFO epoch  7/10  train_loss 0.1292  train_acc 0.9524  val_loss 0.3146  val_acc 0.8902  6.2s
+2026-08-11 08:13:09,571 INFO epoch  8/10  train_loss 0.1065  train_acc 0.9628  val_loss 0.3342  val_acc 0.8870  6.1s
+2026-08-11 08:13:15,707 INFO epoch  9/10  train_loss 0.0807  train_acc 0.9731  val_loss 0.3877  val_acc 0.8762  6.1s
+2026-08-11 08:13:21,872 INFO epoch 10/10  train_loss 0.0719  train_acc 0.9756  val_loss 0.4136  val_acc 0.8828  6.2s
+2026-08-11 08:13:21,872 INFO 训练结束：最佳 val_acc 0.8910（epoch 4），总耗时 63.6s
+2026-08-11 08:13:21,977 INFO 已写出 cnnlstm_history.csv 与 cnnlstm_summary.json
+2026-08-11 08:13:24,370 INFO 已写出 cnnlstm_submission.csv（25000 行）
+2026-08-11 08:13:24,382 INFO [positive p=0.9982] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:13:24,382 INFO [negative p=0.0011] A complete waste of time. Terrible script, wooden acting, and the plot made no s

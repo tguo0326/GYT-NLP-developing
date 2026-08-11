@@ -1,0 +1,300 @@
+{
+  "validation": [
+    {
+      "prob_positive": 0.9982,
+      "prediction": "positive",
+      "length": 184,
+      "top_words": [
+        [
+          "episode",
+          0.09262
+        ],
+        [
+          "this",
+          0.0841
+        ],
+        [
+          "best",
+          0.06925
+        ],
+        [
+          "episode",
+          0.05914
+        ],
+        [
+          "season",
+          0.0421
+        ],
+        [
+          "in",
+          0.0354
+        ],
+        [
+          "this",
+          0.03267
+        ],
+        [
+          "spectacular",
+          0.03142
+        ],
+        [
+          "the",
+          0.03122
+        ],
+        [
+          "completing",
+          0.02868
+        ]
+      ],
+      "excerpt": "chloe is mysteriously saved from dr caselli the corrupt doctor responsible for transferring patients with abilities from belle reve to project and a fraction of second later clark arrives he finds that bart allan has returned to smallville and they",
+      "truth": "positive"
+    },
+    {
+      "prob_positive": 0.9986,
+      "prediction": "positive",
+      "length": 100,
+      "top_words": [
+        [
+          "paced",
+          0.05193
+        ],
+        [
+          "superb",
+          0.04498
+        ],
+        [
+          "great",
+          0.04352
+        ],
+        [
+          "film",
+          0.03508
+        ],
+        [
+          "attentive",
+          0.03327
+        ],
+        [
+          "pauses",
+          0.03227
+        ],
+        [
+          "well",
+          0.02755
+        ],
+        [
+          "a",
+          0.02602
+        ],
+        [
+          "reminder",
+          0.02406
+        ],
+        [
+          "this",
+          0.02381
+        ]
+      ],
+      "excerpt": "the star of this film is the screenplay attention to detail for the period in dress language social mores we don t hurt women and the politics are remarkable it is a reminder of kosovo to day the subtle pieces",
+      "truth": "positive"
+    },
+    {
+      "prob_positive": 0.0042,
+      "prediction": "negative",
+      "length": 512,
+      "top_words": [
+        [
+          "unfunny",
+          0.03955
+        ],
+        [
+          "unfunniest",
+          0.03114
+        ],
+        [
+          "very",
+          0.03014
+        ],
+        [
+          "badly",
+          0.02969
+        ],
+        [
+          "shallow",
+          0.02396
+        ],
+        [
+          "of",
+          0.02259
+        ],
+        [
+          "series",
+          0.02073
+        ],
+        [
+          "questionable",
+          0.02003
+        ],
+        [
+          "just",
+          0.01833
+        ],
+        [
+          "a",
+          0.01795
+        ]
+      ],
+      "excerpt": "in the questionable comedy vein of mel brooks wholly moses tries to take the bible story of moses and make fun of it resulting in the unfunniest biblical spoof ever filmed there is no real plot here just excuses to",
+      "truth": "negative"
+    },
+    {
+      "prob_positive": 0.1164,
+      "prediction": "negative",
+      "length": 244,
+      "top_words": [
+        [
+          "totally",
+          0.07539
+        ],
+        [
+          "is",
+          0.04837
+        ],
+        [
+          "laughable",
+          0.04599
+        ],
+        [
+          "unable",
+          0.04348
+        ],
+        [
+          "great",
+          0.04046
+        ],
+        [
+          "actors",
+          0.0353
+        ],
+        [
+          "film",
+          0.03213
+        ],
+        [
+          "a",
+          0.02974
+        ],
+        [
+          "neat",
+          0.01808
+        ],
+        [
+          "of",
+          0.01807
+        ]
+      ],
+      "excerpt": "there was a great film to be made about steve biko sadly this wasn t it denzel washington never the most flexible of actors is totally unable to convey the great charisma that biko had attenborough s big crowd scenes",
+      "truth": "negative"
+    }
+  ],
+  "custom": [
+    {
+      "prob_positive": 0.9995,
+      "prediction": "positive",
+      "length": 16,
+      "top_words": [
+        [
+          "wonderful",
+          0.16666
+        ],
+        [
+          "absolutely",
+          0.14971
+        ],
+        [
+          "superb",
+          0.12961
+        ],
+        [
+          "acting",
+          0.0916
+        ],
+        [
+          "was",
+          0.08834
+        ],
+        [
+          "the",
+          0.0837
+        ],
+        [
+          "was",
+          0.07062
+        ],
+        [
+          "this",
+          0.06123
+        ],
+        [
+          "movie",
+          0.05606
+        ],
+        [
+          "and",
+          0.0395
+        ]
+      ],
+      "excerpt": "this movie was absolutely wonderful the acting was superb and the story moved me to tears",
+      "review": "This movie was absolutely wonderful. The acting was superb and the story moved me to tears."
+    },
+    {
+      "prob_positive": 0.0,
+      "prediction": "negative",
+      "length": 17,
+      "top_words": [
+        [
+          "waste",
+          0.12432
+        ],
+        [
+          "terrible",
+          0.11718
+        ],
+        [
+          "of",
+          0.10353
+        ],
+        [
+          "time",
+          0.10157
+        ],
+        [
+          "complete",
+          0.1013
+        ],
+        [
+          "script",
+          0.09067
+        ],
+        [
+          "acting",
+          0.06476
+        ],
+        [
+          "a",
+          0.06
+        ],
+        [
+          "wooden",
+          0.05821
+        ],
+        [
+          "and",
+          0.04801
+        ]
+      ],
+      "excerpt": "a complete waste of time terrible script wooden acting and the plot made no sense at all",
+      "review": "A complete waste of time. Terrible script, wooden acting, and the plot made no sense at all."
+    }
+  ]
+}

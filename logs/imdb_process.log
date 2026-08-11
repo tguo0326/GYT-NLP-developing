@@ -1,0 +1,25 @@
+2026-08-11 07:59:33,202 INFO labeledTrainData 25000 条 / testData 25000 条 / unlabeledTrainData 50000 条
+2026-08-11 07:59:33,202 INFO 清洗与分词 ...
+2026-08-11 07:59:37,739 INFO 训练集评论长度：均值 236.9 词，中位数 177，95 分位 608，最长 2494
+2026-08-11 07:59:37,739 INFO max_len=512 会截断 7.8% 的评论
+2026-08-11 07:59:38,534 INFO 词表大小 99420（含 <unk>，Embedding 矩阵行数 99421）
+2026-08-11 07:59:38,551 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-11 07:59:38,552 INFO 编码与定长填充（max_len=512）...
+2026-08-11 07:59:42,933 INFO 加载词向量 glove/glove.840B.300d.kv ...
+2026-08-11 07:59:42,933 INFO loading KeyedVectors object from glove/glove.840B.300d.kv
+2026-08-11 07:59:43,896 INFO loading vectors from glove/glove.840B.300d.kv.vectors.npy with mmap=r
+2026-08-11 07:59:43,898 INFO KeyedVectors lifecycle event {'fname': 'glove/glove.840B.300d.kv', 'datetime': '2026-08-11T07:59:43.897068', 'gensim': '4.4.0', 'python': '3.13.5 | packaged by Anaconda, Inc. | (main, Jun 12 2025, 16:09:02) [GCC 11.2.0]', 'platform': 'Linux-6.8.0-1061-aws-x86_64-with-glibc2.35', 'event': 'loaded'}
+2026-08-11 07:59:43,898 INFO GloVe 词表 2196017 词 × 300 维
+2026-08-11 07:59:44,930 INFO === 数据形状 ===
+2026-08-11 07:59:44,931 INFO   train_features  (20000, 512) torch.int64
+2026-08-11 07:59:44,931 INFO   train_labels    (20000,) torch.int64
+2026-08-11 07:59:44,931 INFO   val_features    (5000, 512) torch.int64
+2026-08-11 07:59:44,931 INFO   val_labels      (5000,) torch.int64
+2026-08-11 07:59:44,931 INFO   test_features   (25000, 512) torch.int64
+2026-08-11 07:59:44,931 INFO   weight          (99421, 300) torch.float32
+2026-08-11 07:59:44,931 INFO === OOV ===
+2026-08-11 07:59:44,931 INFO   未命中 GloVe 的词型: 22106 / 99420（22.23%）
+2026-08-11 07:59:45,029 INFO   未命中 GloVe 的词次: 18980 / 4432955（0.43%，训练集）
+2026-08-11 07:59:45,030 INFO   OOV 样例: aaaaaaaaaaaahhhhhhhhhhhhhh, aaaaaaaargh, aaaaaaahhhhhhggg, aaaaagh, aaaaarrrrrrgggggghhhhhh, aaaaatch, aaaahhhhhhh, aaaarrgh, aaaawwwwww, aaaggghhhhhhh, aaahhhhhhh, aaam, aaaugh, aaawwwwnnn, aada, aadha, aaghh, aaila, aailiyah, aaip
+2026-08-11 07:59:45,059 INFO   Embedding 非零行: 77314 / 99421
+2026-08-11 07:59:47,080 INFO 已写出 /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3（311.9 MB）

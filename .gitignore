@@ -1,12 +1,43 @@
 # 数据集：从 Kaggle 或 aclImdb 重建，不入库
+corpus/
 data/
 *.tsv
 *.tsv.zip
 
-# 训练产物
+# GloVe 词向量（840B.300d 解压后约 5.6 GB）
+glove/
+*.zip
+*.txt.gz
+
+# 预处理缓存
+pickle/
+*.pickle
+*.pickle3
+*.npy
+*.npz
+
+# 训练产物：模型权重与日志
 models/
+checkpoints/
+logs/
+# 训练日志是任务 14 要交的东西，而且每份只有几 KB，入库
+!logs/
+!logs/*.log
+*.pt
+*.pth
+*.bin
+*.ckpt
 submissions/
 *.csv
+
+# results/ 是要入库的：对比表、逐 epoch 指标、Kaggle 提交文件都很小，
+# 而且是「实验结果可复查」的凭据。只把权重挡在外面。
+!results/
+!results/*.csv
+!results/*.json
+!results/*.md
+results/**/*.pt
+results/**/*.pth
 
 # Python
 __pycache__/
@@ -15,3 +46,4 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 venv/
+.DS_Store

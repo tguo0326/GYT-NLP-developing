@@ -1,0 +1,24 @@
+2026-08-11 08:02:21,013 INFO model=lstm device=cuda seed=42
+2026-08-11 08:02:21,037 INFO gpu: Tesla T4
+2026-08-11 08:02:21,037 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 08:02:21,777 INFO lstm: 总参数 30,579,902 / 可训练 753,602
+2026-08-11 08:02:22,520 INFO 参数量: 总计 30,579,902, 可训练 753,602
+2026-08-11 08:02:51,998 INFO epoch  1/10  train_loss 0.3940  train_acc 0.8141  val_loss 0.3154  val_acc 0.8630  29.5s
+2026-08-11 08:02:52,209 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/lstm_best.pt
+2026-08-11 08:03:21,134 INFO epoch  2/10  train_loss 0.2909  train_acc 0.8807  val_loss 0.2968  val_acc 0.8720  28.9s
+2026-08-11 08:03:21,490 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/lstm_best.pt
+2026-08-11 08:03:50,572 INFO epoch  3/10  train_loss 0.2558  train_acc 0.8959  val_loss 0.3006  val_acc 0.8746  29.1s
+2026-08-11 08:03:50,956 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/lstm_best.pt
+2026-08-11 08:04:20,086 INFO epoch  4/10  train_loss 0.2395  train_acc 0.9018  val_loss 0.2734  val_acc 0.8894  29.1s
+2026-08-11 08:04:20,490 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/lstm_best.pt
+2026-08-11 08:04:49,466 INFO epoch  5/10  train_loss 0.1978  train_acc 0.9220  val_loss 0.2790  val_acc 0.8868  29.0s
+2026-08-11 08:05:18,567 INFO epoch  6/10  train_loss 0.1701  train_acc 0.9348  val_loss 0.3160  val_acc 0.8856  29.1s
+2026-08-11 08:05:47,822 INFO epoch  7/10  train_loss 0.1393  train_acc 0.9476  val_loss 0.3187  val_acc 0.8844  29.3s
+2026-08-11 08:06:17,038 INFO epoch  8/10  train_loss 0.1072  train_acc 0.9611  val_loss 0.3788  val_acc 0.8792  29.2s
+2026-08-11 08:06:46,110 INFO epoch  9/10  train_loss 0.0869  train_acc 0.9685  val_loss 0.4052  val_acc 0.8776  29.1s
+2026-08-11 08:07:15,258 INFO epoch 10/10  train_loss 0.0651  train_acc 0.9765  val_loss 0.4337  val_acc 0.8836  29.1s
+2026-08-11 08:07:15,258 INFO 训练结束：最佳 val_acc 0.8894（epoch 4），总耗时 292.7s
+2026-08-11 08:07:15,365 INFO 已写出 lstm_history.csv 与 lstm_summary.json
+2026-08-11 08:07:21,236 INFO 已写出 lstm_submission.csv（25000 行）
+2026-08-11 08:07:21,242 INFO [positive p=0.9987] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:07:21,242 INFO [negative p=0.0006] A complete waste of time. Terrible script, wooden acting, and the plot made no s

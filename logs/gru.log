@@ -1,0 +1,24 @@
+2026-08-11 08:07:23,838 INFO model=gru device=cuda seed=42
+2026-08-11 08:07:23,858 INFO gpu: Tesla T4
+2026-08-11 08:07:23,858 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 08:07:24,569 INFO gru: 总参数 30,391,742 / 可训练 565,442
+2026-08-11 08:07:25,333 INFO 参数量: 总计 30,391,742, 可训练 565,442
+2026-08-11 08:07:53,890 INFO epoch  1/10  train_loss 0.3916  train_acc 0.8144  val_loss 0.3425  val_acc 0.8458  28.6s
+2026-08-11 08:07:54,098 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/gru_best.pt
+2026-08-11 08:08:22,284 INFO epoch  2/10  train_loss 0.2785  train_acc 0.8847  val_loss 0.3683  val_acc 0.8416  28.2s
+2026-08-11 08:08:50,490 INFO epoch  3/10  train_loss 0.2452  train_acc 0.9008  val_loss 0.2792  val_acc 0.8876  28.2s
+2026-08-11 08:08:50,914 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/gru_best.pt
+2026-08-11 08:09:18,931 INFO epoch  4/10  train_loss 0.2130  train_acc 0.9173  val_loss 0.2640  val_acc 0.8926  28.0s
+2026-08-11 08:09:19,356 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/gru_best.pt
+2026-08-11 08:09:47,427 INFO epoch  5/10  train_loss 0.1807  train_acc 0.9298  val_loss 0.2895  val_acc 0.8820  28.1s
+2026-08-11 08:10:15,550 INFO epoch  6/10  train_loss 0.1550  train_acc 0.9415  val_loss 0.2973  val_acc 0.8916  28.1s
+2026-08-11 08:10:43,626 INFO epoch  7/10  train_loss 0.1185  train_acc 0.9565  val_loss 0.3215  val_acc 0.8936  28.1s
+2026-08-11 08:10:44,051 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/gru_best.pt
+2026-08-11 08:11:12,229 INFO epoch  8/10  train_loss 0.0817  train_acc 0.9712  val_loss 0.4146  val_acc 0.8904  28.2s
+2026-08-11 08:11:40,292 INFO epoch  9/10  train_loss 0.0549  train_acc 0.9808  val_loss 0.4348  val_acc 0.8832  28.1s
+2026-08-11 08:12:08,345 INFO epoch 10/10  train_loss 0.0435  train_acc 0.9850  val_loss 0.4715  val_acc 0.8874  28.1s
+2026-08-11 08:12:08,345 INFO 训练结束：最佳 val_acc 0.8936（epoch 7），总耗时 283.0s
+2026-08-11 08:12:08,452 INFO 已写出 gru_history.csv 与 gru_summary.json
+2026-08-11 08:12:14,166 INFO 已写出 gru_submission.csv（25000 行）
+2026-08-11 08:12:14,172 INFO [positive p=0.9992] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:12:14,172 INFO [negative p=0.0001] A complete waste of time. Terrible script, wooden acting, and the plot made no s

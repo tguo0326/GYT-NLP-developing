@@ -1,0 +1,37 @@
+2026-08-11 09:32:47,699 INFO model=bert device=cuda seed=42
+2026-08-11 09:32:47,723 INFO gpu: Tesla T4
+2026-08-11 09:32:47,723 INFO 微调 bert-base-uncased（max_length=256, batch=16, lr=2e-05, epochs=2）
+2026-08-11 09:32:48,753 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-11 09:33:03,020 INFO 参数量: 总计 109,483,778, 可训练 109,483,778
+2026-08-11 09:42:24,105 INFO 验证准确率 0.9194，训练 544.3s
+2026-08-11 09:42:27,311 INFO 已保存微调后的模型到 /home/ubuntu/科研专用/NLP/models/bert_hf
+2026-08-11 09:42:27,312 INFO step 100    epoch 0.08  train_loss 0.6525  lr 1.31e-05
+2026-08-11 09:42:27,312 INFO step 200    epoch 0.16  train_loss 0.4103  lr 1.96e-05
+2026-08-11 09:42:27,312 INFO step 300    epoch 0.24  train_loss 0.3301  lr 1.87e-05
+2026-08-11 09:42:27,312 INFO step 400    epoch 0.32  train_loss 0.3122  lr 1.79e-05
+2026-08-11 09:42:27,312 INFO step 500    epoch 0.40  train_loss 0.2879  lr 1.70e-05
+2026-08-11 09:42:27,312 INFO step 600    epoch 0.48  train_loss 0.2249  lr 1.62e-05
+2026-08-11 09:42:27,312 INFO step 700    epoch 0.56  train_loss 0.2646  lr 1.53e-05
+2026-08-11 09:42:27,312 INFO step 800    epoch 0.64  train_loss 0.2487  lr 1.45e-05
+2026-08-11 09:42:27,312 INFO step 900    epoch 0.72  train_loss 0.2841  lr 1.36e-05
+2026-08-11 09:42:27,312 INFO step 1000   epoch 0.80  train_loss 0.2670  lr 1.28e-05
+2026-08-11 09:42:27,312 INFO step 1100   epoch 0.88  train_loss 0.2277  lr 1.19e-05
+2026-08-11 09:42:27,312 INFO step 1200   epoch 0.96  train_loss 0.2418  lr 1.11e-05
+2026-08-11 09:42:27,312 INFO epoch 1.00  val_loss 0.2494  val_acc 0.9078  16.4s
+2026-08-11 09:42:27,312 INFO step 1300   epoch 1.04  train_loss 0.1942  lr 1.02e-05
+2026-08-11 09:42:27,312 INFO step 1400   epoch 1.12  train_loss 0.1613  lr 9.39e-06
+2026-08-11 09:42:27,312 INFO step 1500   epoch 1.20  train_loss 0.1617  lr 8.54e-06
+2026-08-11 09:42:27,313 INFO step 1600   epoch 1.28  train_loss 0.1707  lr 7.69e-06
+2026-08-11 09:42:27,313 INFO step 1700   epoch 1.36  train_loss 0.1453  lr 6.83e-06
+2026-08-11 09:42:27,313 INFO step 1800   epoch 1.44  train_loss 0.1499  lr 5.98e-06
+2026-08-11 09:42:27,313 INFO step 1900   epoch 1.52  train_loss 0.1871  lr 5.13e-06
+2026-08-11 09:42:27,313 INFO step 2000   epoch 1.60  train_loss 0.1366  lr 4.28e-06
+2026-08-11 09:42:27,313 INFO step 2100   epoch 1.68  train_loss 0.1915  lr 3.43e-06
+2026-08-11 09:42:27,313 INFO step 2200   epoch 1.76  train_loss 0.1333  lr 2.58e-06
+2026-08-11 09:42:27,313 INFO step 2300   epoch 1.84  train_loss 0.1489  lr 1.73e-06
+2026-08-11 09:42:27,313 INFO step 2400   epoch 1.92  train_loss 0.1457  lr 8.77e-07
+2026-08-11 09:42:27,313 INFO step 2500   epoch 2.00  train_loss 0.1519  lr 3.40e-08
+2026-08-11 09:42:27,313 INFO epoch 2.00  val_loss 0.2777  val_acc 0.9194  16.5s
+2026-08-11 09:42:27,313 INFO epoch 2.00  val_loss 0.2777  val_acc 0.9194  16.4s
+2026-08-11 09:43:49,136 INFO 已写出 bert_submission.csv（25000 行）
+2026-08-11 09:43:49,136 INFO 已写出 bert_summary.json

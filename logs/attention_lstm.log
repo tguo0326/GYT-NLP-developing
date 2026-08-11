@@ -1,0 +1,42 @@
+2026-08-11 08:13:27,074 INFO model=attention_lstm device=cuda seed=42
+2026-08-11 08:13:27,096 INFO gpu: Tesla T4
+2026-08-11 08:13:27,097 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 08:13:27,816 INFO attention_lstm: 总参数 30,728,702 / 可训练 902,402
+2026-08-11 08:13:28,577 INFO 参数量: 总计 30,728,702, 可训练 902,402
+2026-08-11 08:13:59,343 INFO epoch  1/10  train_loss 0.3755  train_acc 0.8237  val_loss 0.3283  val_acc 0.8616  30.8s
+2026-08-11 08:13:59,557 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/attention_lstm_best.pt
+2026-08-11 08:14:29,844 INFO epoch  2/10  train_loss 0.2752  train_acc 0.8849  val_loss 0.2936  val_acc 0.8794  30.3s
+2026-08-11 08:14:30,287 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/attention_lstm_best.pt
+2026-08-11 08:15:00,596 INFO epoch  3/10  train_loss 0.2425  train_acc 0.9006  val_loss 0.2704  val_acc 0.8884  30.3s
+2026-08-11 08:15:01,014 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/attention_lstm_best.pt
+2026-08-11 08:15:31,389 INFO epoch  4/10  train_loss 0.2114  train_acc 0.9180  val_loss 0.2715  val_acc 0.8922  30.4s
+2026-08-11 08:15:31,820 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/attention_lstm_best.pt
+2026-08-11 08:16:02,152 INFO epoch  5/10  train_loss 0.1836  train_acc 0.9286  val_loss 0.2972  val_acc 0.8896  30.3s
+2026-08-11 08:16:32,415 INFO epoch  6/10  train_loss 0.1454  train_acc 0.9463  val_loss 0.3225  val_acc 0.8832  30.3s
+2026-08-11 08:17:02,745 INFO epoch  7/10  train_loss 0.1093  train_acc 0.9604  val_loss 0.3505  val_acc 0.8802  30.3s
+2026-08-11 08:17:33,070 INFO epoch  8/10  train_loss 0.0784  train_acc 0.9732  val_loss 0.4045  val_acc 0.8874  30.3s
+2026-08-11 08:18:03,363 INFO epoch  9/10  train_loss 0.0544  train_acc 0.9804  val_loss 0.5008  val_acc 0.8774  30.3s
+2026-08-11 08:18:33,746 INFO epoch 10/10  train_loss 0.0405  train_acc 0.9853  val_loss 0.5648  val_acc 0.8808  30.4s
+2026-08-11 08:18:33,747 INFO 训练结束：最佳 val_acc 0.8922（epoch 4），总耗时 305.2s
+2026-08-11 08:18:33,852 INFO 已写出 attention_lstm_history.csv 与 attention_lstm_summary.json
+2026-08-11 08:18:40,029 INFO 已写出 attention_lstm_submission.csv（25000 行）
+2026-08-11 08:18:40,036 INFO [positive p=0.9995] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:18:40,036 INFO [negative p=0.0000] A complete waste of time. Terrible script, wooden acting, and the plot made no s
+2026-08-11 08:18:40,036 INFO === 注意力权重（验证集前 4 条） ===
+2026-08-11 08:18:40,062 INFO 预测 positive (p=0.9982) / 真实 positive
+2026-08-11 08:18:40,062 INFO   开头: chloe is mysteriously saved from dr caselli the corrupt doctor responsible for transferring patients with abilities from belle reve to project and a fraction of second later clark arrives he finds that bart allan has returned to smallville and they ...
+2026-08-11 08:18:40,062 INFO   高权重词: episode(0.0926), this(0.0841), best(0.0693), episode(0.0591), season(0.0421), in(0.0354), this(0.0327), spectacular(0.0314), the(0.0312), completing(0.0287)
+2026-08-11 08:18:40,062 INFO 预测 positive (p=0.9986) / 真实 positive
+2026-08-11 08:18:40,062 INFO   开头: the star of this film is the screenplay attention to detail for the period in dress language social mores we don t hurt women and the politics are remarkable it is a reminder of kosovo to day the subtle pieces ...
+2026-08-11 08:18:40,062 INFO   高权重词: paced(0.0519), superb(0.0450), great(0.0435), film(0.0351), attentive(0.0333), pauses(0.0323), well(0.0276), a(0.0260), reminder(0.0241), this(0.0238)
+2026-08-11 08:18:40,062 INFO 预测 negative (p=0.0042) / 真实 negative
+2026-08-11 08:18:40,062 INFO   开头: in the questionable comedy vein of mel brooks wholly moses tries to take the bible story of moses and make fun of it resulting in the unfunniest biblical spoof ever filmed there is no real plot here just excuses to ...
+2026-08-11 08:18:40,062 INFO   高权重词: unfunny(0.0396), unfunniest(0.0311), very(0.0301), badly(0.0297), shallow(0.0240), of(0.0226), series(0.0207), questionable(0.0200), just(0.0183), a(0.0180)
+2026-08-11 08:18:40,063 INFO 预测 negative (p=0.1164) / 真实 negative
+2026-08-11 08:18:40,063 INFO   开头: there was a great film to be made about steve biko sadly this wasn t it denzel washington never the most flexible of actors is totally unable to convey the great charisma that biko had attenborough s big crowd scenes ...
+2026-08-11 08:18:40,063 INFO   高权重词: totally(0.0754), is(0.0484), laughable(0.0460), unable(0.0435), great(0.0405), actors(0.0353), film(0.0321), a(0.0297), neat(0.0181), of(0.0181)
+2026-08-11 08:18:40,065 INFO [positive p=0.9995] This movie was absolutely wonderful. The acting was superb and the story moved me to tears.
+2026-08-11 08:18:40,065 INFO   高权重词: wonderful(0.1667), absolutely(0.1497), superb(0.1296), acting(0.0916), was(0.0883), the(0.0837), was(0.0706), this(0.0612), movie(0.0561), and(0.0395)
+2026-08-11 08:18:40,066 INFO [negative p=0.0000] A complete waste of time. Terrible script, wooden acting, and the plot made no sense at all.
+2026-08-11 08:18:40,066 INFO   高权重词: waste(0.1243), terrible(0.1172), of(0.1035), time(0.1016), complete(0.1013), script(0.0907), acting(0.0648), a(0.0600), wooden(0.0582), and(0.0480)
+2026-08-11 08:18:40,066 INFO 注意力权重已写出 attention_lstm_attention.json

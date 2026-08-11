@@ -1,0 +1,24 @@
+2026-08-11 09:27:34,891 INFO model=distilbert device=cuda seed=42
+2026-08-11 09:27:34,917 INFO gpu: Tesla T4
+2026-08-11 09:27:34,917 INFO 微调 distilbert-base-uncased（max_length=256, batch=32, lr=5e-05, epochs=2）
+2026-08-11 09:27:35,913 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-11 09:27:49,253 INFO 参数量: 总计 66,955,010, 可训练 66,955,010
+2026-08-11 09:31:59,522 INFO 验证准确率 0.9090，训练 241.8s
+2026-08-11 09:32:01,111 INFO 已保存微调后的模型到 /home/ubuntu/科研专用/NLP/models/distilbert_hf
+2026-08-11 09:32:01,111 INFO step 100    epoch 0.16  train_loss 0.5197  lr 4.91e-05
+2026-08-11 09:32:01,111 INFO step 200    epoch 0.32  train_loss 0.3313  lr 4.48e-05
+2026-08-11 09:32:01,112 INFO step 300    epoch 0.48  train_loss 0.2722  lr 4.06e-05
+2026-08-11 09:32:01,112 INFO step 400    epoch 0.64  train_loss 0.2684  lr 3.63e-05
+2026-08-11 09:32:01,112 INFO step 500    epoch 0.80  train_loss 0.2804  lr 3.20e-05
+2026-08-11 09:32:01,112 INFO step 600    epoch 0.96  train_loss 0.2415  lr 2.78e-05
+2026-08-11 09:32:01,112 INFO epoch 1.00  val_loss 0.2611  val_acc 0.9006  8.2s
+2026-08-11 09:32:01,112 INFO step 700    epoch 1.12  train_loss 0.1679  lr 2.35e-05
+2026-08-11 09:32:01,112 INFO step 800    epoch 1.28  train_loss 0.1484  lr 1.93e-05
+2026-08-11 09:32:01,112 INFO step 900    epoch 1.44  train_loss 0.1345  lr 1.50e-05
+2026-08-11 09:32:01,112 INFO step 1000   epoch 1.60  train_loss 0.1501  lr 1.08e-05
+2026-08-11 09:32:01,112 INFO step 1100   epoch 1.76  train_loss 0.1422  lr 6.51e-06
+2026-08-11 09:32:01,112 INFO step 1200   epoch 1.92  train_loss 0.1410  lr 2.26e-06
+2026-08-11 09:32:01,112 INFO epoch 2.00  val_loss 0.2643  val_acc 0.9090  8.2s
+2026-08-11 09:32:01,112 INFO epoch 2.00  val_loss 0.2643  val_acc 0.9090  8.2s
+2026-08-11 09:32:41,904 INFO 已写出 distilbert_submission.csv（25000 行）
+2026-08-11 09:32:41,904 INFO 已写出 distilbert_summary.json

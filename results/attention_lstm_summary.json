@@ -1,0 +1,14 @@
+{
+  "model": "attention_lstm",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.8922,
+  "best_epoch": 4,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30728702,
+  "trainable_params": 902402,
+  "train_seconds": 305.2,
+  "seconds_per_epoch": 30.5,
+  "device": "cuda",
+  "checkpoint": "models/attention_lstm_best.pt"
+}

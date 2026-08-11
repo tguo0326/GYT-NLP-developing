@@ -1,0 +1,14 @@
+{
+  "model": "cnnlstm",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.891,
+  "best_epoch": 4,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30140798,
+  "trainable_params": 314498,
+  "train_seconds": 63.6,
+  "seconds_per_epoch": 6.4,
+  "device": "cuda",
+  "checkpoint": "models/cnnlstm_best.pt"
+}

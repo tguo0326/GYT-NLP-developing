@@ -1,0 +1,24 @@
+2026-08-11 07:59:55,519 INFO model=cnn device=cuda seed=42
+2026-08-11 07:59:55,548 INFO gpu: Tesla T4
+2026-08-11 07:59:55,548 INFO loading /home/ubuntu/科研专用/NLP/pickle/imdb_glove.pickle3 ...
+2026-08-11 07:59:56,317 INFO cnn: 总参数 30,288,254 / 可训练 461,954
+2026-08-11 07:59:58,129 INFO 参数量: 总计 30,288,254, 可训练 461,954
+2026-08-11 08:00:08,765 INFO epoch  1/10  train_loss 0.4101  train_acc 0.8063  val_loss 0.3081  val_acc 0.8664  10.6s
+2026-08-11 08:00:08,975 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnn_best.pt
+2026-08-11 08:00:18,356 INFO epoch  2/10  train_loss 0.2920  train_acc 0.8772  val_loss 0.2882  val_acc 0.8780  9.4s
+2026-08-11 08:00:18,779 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnn_best.pt
+2026-08-11 08:00:28,218 INFO epoch  3/10  train_loss 0.2415  train_acc 0.9033  val_loss 0.2778  val_acc 0.8864  9.4s
+2026-08-11 08:00:28,635 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnn_best.pt
+2026-08-11 08:00:38,117 INFO epoch  4/10  train_loss 0.1910  train_acc 0.9258  val_loss 0.3100  val_acc 0.8740  9.5s
+2026-08-11 08:00:47,656 INFO epoch  5/10  train_loss 0.1584  train_acc 0.9405  val_loss 0.2946  val_acc 0.8876  9.5s
+2026-08-11 08:00:48,039 INFO   ↑ 验证准确率新高，已保存 /home/ubuntu/科研专用/NLP/models/cnn_best.pt
+2026-08-11 08:00:57,583 INFO epoch  6/10  train_loss 0.1194  train_acc 0.9556  val_loss 0.2942  val_acc 0.8868  9.5s
+2026-08-11 08:01:07,173 INFO epoch  7/10  train_loss 0.0950  train_acc 0.9657  val_loss 0.3228  val_acc 0.8820  9.6s
+2026-08-11 08:01:16,769 INFO epoch  8/10  train_loss 0.0820  train_acc 0.9709  val_loss 0.3388  val_acc 0.8818  9.6s
+2026-08-11 08:01:26,383 INFO epoch  9/10  train_loss 0.0678  train_acc 0.9754  val_loss 0.3382  val_acc 0.8856  9.6s
+2026-08-11 08:01:36,025 INFO epoch 10/10  train_loss 0.0592  train_acc 0.9812  val_loss 0.3491  val_acc 0.8850  9.6s
+2026-08-11 08:01:36,025 INFO 训练结束：最佳 val_acc 0.8876（epoch 5），总耗时 97.9s
+2026-08-11 08:01:36,128 INFO 已写出 cnn_history.csv 与 cnn_summary.json
+2026-08-11 08:01:40,413 INFO 已写出 cnn_submission.csv（25000 行）
+2026-08-11 08:01:40,438 INFO [positive p=0.9987] This movie was absolutely wonderful. The acting was superb and the story moved m
+2026-08-11 08:01:40,438 INFO [negative p=0.0000] A complete waste of time. Terrible script, wooden acting, and the plot made no s

@@ -1,0 +1,36 @@
+解析 glove/glove.840B.300d.txt …
+  已读 250,000 行
+  已读 500,000 行
+  已读 750,000 行
+  已读 1,000,000 行
+  已读 1,250,000 行
+  已读 1,500,000 行
+  已读 1,750,000 行
+  已读 2,000,000 行
+共 2,196,017 个词，跳过 0 行异常
+已保存 glove/glove.840B.300d.kv
+
+加载 glove/glove.840B.300d.kv（mmap 模式）…
+词表大小 2,196,017，维度 300
+
+--- 1. 单词向量 ---
+movie: shape=(300,) dtype=float32 范数=7.497
+前 8 维: [0.2071000039577484, -0.4765999913215637, 0.15479999780654907, -0.38960000872612, 0.484499990940094, 0.5982000231742859, -0.06040000170469284, -0.6642000079154968]
+
+--- 2. 相似词 ---
+movie      → movies(0.880), film(0.791), films(0.752), flick(0.719), Movie(0.715), starring(0.667)
+awful      → horrible(0.919), terrible(0.915), horrid(0.870), dreadful(0.831), horrendous(0.816), bad(0.772)
+brilliant  → fantastic(0.737), superb(0.720), brilliantly(0.714), amazing(0.691), terrific(0.688), dazzling(0.677)
+france     → paris(0.792), europe(0.778), italy(0.721), spain(0.710), germany(0.685), belgium(0.678)
+
+--- 3. 单词相似度 ---
+good     ~ great    = 0.8417
+good     ~ bad      = 0.7355
+movie    ~ film     = 0.7912
+movie    ~ banana   = 0.1742
+king     ~ queen    = 0.7253
+
+--- 4. 向量算术 ---
+king - man + woman → queen(0.775), prince(0.612), princess(0.602)
+
+✓ 任务 4 自检通过

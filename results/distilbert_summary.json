@@ -1,0 +1,15 @@
+{
+  "model": "distilbert",
+  "text_representation": "distilbert-base-uncased 上下文词向量（全模型微调）",
+  "best_val_acc": 0.909,
+  "best_epoch": 3,
+  "epochs": 2,
+  "batch_size": 32,
+  "max_length": 256,
+  "total_params": 66955010,
+  "trainable_params": 66955010,
+  "train_seconds": 241.8,
+  "seconds_per_epoch": 120.9,
+  "device": "cuda",
+  "checkpoint": "models/distilbert_hf"
+}
