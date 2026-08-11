@@ -100,6 +100,46 @@ GPU 为单卡 Tesla T4。表格由 `python tools/collect_results.py` 自动生�
 
 <!-- RESULTS_TABLE_END -->
 
+### 测试集分数（25,000 条，模型从未见过）
+
+上表是**验证集**的数字（用于选型）。Stanford aclImdb 的测试集标签是公开的，
+所以本地就能算出真正的测试集分数——不用等 Kaggle 排行榜：
+
+```bash
+python tools/score_test.py --model all      # → results/test_scores.csv
+```
+
+| 模型 | 测试集准确率 | ROC-AUC |
+|---|--:|--:|
+| **RoBERTa** | **0.9371** | **0.9835** |
+| BERT | 0.9190 | 0.9757 |
+| DistilBERT | 0.9112 | 0.9712 |
+| Capsule-LSTM | 0.9036 | 0.9648 |
+| Attention-LSTM | 0.9026 | 0.9650 |
+| CNN-LSTM | 0.8997 | 0.9637 |
+| GRU | 0.8986 | 0.9630 |
+| LSTM | 0.8975 | 0.9629 |
+| CNN | 0.8858 | 0.9579 |
+| Transformer | 0.8814 | 0.9540 |
+
+测试集分数普遍比验证集高 0.5~1 个百分点。这不是异常——验证集只有 5,000 条，
+本身有约 ±0.9% 的抽样波动，而测试集有 25,000 条，估计更稳。
+排序和验证集完全一致，说明选型没有过拟合验证集。
+
+### 提交到 Kaggle
+
+竞赛的评价指标是 **ROC-AUC，不是准确率**，所以要交**正面概率**而不是 0/1 硬标签：
+
+```bash
+python tools/score_test.py --model roberta   # → results/roberta_submission_proba.csv
+```
+
+然后在竞赛页面 `Submit Predictions` 上传这个文件即可。
+
+> ⚠️ 如果 `corpus/imdb/` 里放的是从 aclImdb 重建的 TSV，`id` 与 Kaggle 官方文件不同，
+> **提交会被判为无效**。要上排行榜请先按上文「方式 A」下载官方 `testData.tsv`
+> 覆盖进 `corpus/imdb/`，再重跑 `tools/score_test.py`——脚本会自动检测行数变化并重新编码。
+
 ### 阶段一的结果（Word2Vec 自训词向量）
 
 | 方法 | 特征维度 | Accuracy | ROC-AUC |
