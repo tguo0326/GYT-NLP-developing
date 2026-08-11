@@ -8,7 +8,7 @@
   "epochs": null,
   "total_params": 200000,
   "trainable_params": 200000,
-  "train_seconds": 16.4,
+  "train_seconds": 16.2,
   "seconds_per_epoch": null,
   "device": "cpu",
   "checkpoint": null

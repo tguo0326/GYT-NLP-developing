@@ -109,36 +109,73 @@ GPU 为单卡 Tesla T4。表格由 `python tools/collect_results.py` 自动生�
 python tools/score_test.py --model all      # → results/test_scores.csv
 ```
 
+在 Kaggle **官方** `testData.tsv` 的 25,000 条上评估（其中 24,961 条能与 aclImdb
+的公开标签按正文对齐，指标就在这些行上算）：
+
 | 模型 | 测试集准确率 | ROC-AUC |
 |---|--:|--:|
-| **RoBERTa** | **0.9371** | **0.9835** |
-| BERT | 0.9190 | 0.9757 |
-| DistilBERT | 0.9112 | 0.9712 |
+| **RoBERTa** | **0.9369** | **0.9834** |
+| BERT | 0.9174 | 0.9746 |
+| DistilBERT | 0.9094 | 0.9703 |
 | Capsule-LSTM | 0.9036 | 0.9648 |
-| Attention-LSTM | 0.9026 | 0.9650 |
-| CNN-LSTM | 0.8997 | 0.9637 |
-| GRU | 0.8986 | 0.9630 |
+| Attention-LSTM | 0.9027 | 0.9650 |
+| CNN-LSTM | 0.8998 | 0.9637 |
+| GRU | 0.8985 | 0.9630 |
 | LSTM | 0.8975 | 0.9629 |
 | CNN | 0.8858 | 0.9579 |
-| Transformer | 0.8814 | 0.9540 |
+| Transformer | 0.8815 | 0.9541 |
 
-测试集分数普遍比验证集高 0.5~1 个百分点。这不是异常——验证集只有 5,000 条，
-本身有约 ±0.9% 的抽样波动，而测试集有 25,000 条，估计更稳。
-排序和验证集完全一致，说明选型没有过拟合验证集。
+测试集准确率普遍比验证集高 0.5~1 个百分点。这不是异常——验证集只有 5,000 条，
+本身就有约 ±0.9% 的抽样波动，25,000 条的测试集估计更稳。
+**排序和验证集完全一致**，说明选型没有过拟合验证集。
+
+#### Kaggle 的划分就是 aclImdb 的原始划分（已验证）
+
+用官方文件逐条比对正文（比之前先把官方文件里转义的 `\"` 还原）：
+
+```
+官方 labeledTrainData  ∩ aclImdb-train : 24,878 / 24,904  (99.90%)
+官方 testData          ∩ aclImdb-test  : 24,763 / 24,801  (99.85%)
+官方 testData          ∩ aclImdb-train :    123 / 24,801  ( 0.50%)  ← aclImdb 自带的重复噪声
+能按正文对上的部分，标签一致率 100.0000%
+```
+
+所以上表就是排行榜同源的分数，**不需要真的提交也能知道成绩**。
+（第一次比对只有 53% 命中，原因是官方文件把正文里的引号转义成了 `\"`，
+而 aclImdb 原文是裸引号——纯格式差异，不是两批数据。）
 
 ### 提交到 Kaggle
 
-竞赛的评价指标是 **ROC-AUC，不是准确率**，所以要交**正面概率**而不是 0/1 硬标签：
+提交文件已经生成好了，**直接上传即可**：
 
-```bash
-python tools/score_test.py --model roberta   # → results/roberta_submission_proba.csv
+```
+results/roberta_submission.csv        ← 最好的模型，AUC 0.9834
 ```
 
-然后在竞赛页面 `Submit Predictions` 上传这个文件即可。
+12 个模型每个都有一份，格式与官方 `sampleSubmission.csv` 完全对齐：
 
-> ⚠️ 如果 `corpus/imdb/` 里放的是从 aclImdb 重建的 TSV，`id` 与 Kaggle 官方文件不同，
-> **提交会被判为无效**。要上排行榜请先按上文「方式 A」下载官方 `testData.tsv`
-> 覆盖进 `corpus/imdb/`，再重跑 `tools/score_test.py`——脚本会自动检测行数变化并重新编码。
+```
+"id","sentiment"
+"12311_10",0.998316
+"8348_2",0.001879
+```
+
+要重新生成：`python tools/score_test.py --model roberta`（或 `--model all`）。
+
+**三个容易踩的坑**：
+
+1. **交概率，不要交 0/1**。竞赛指标是 ROC-AUC，硬标签把置信度信息全丢了，
+   实测差好几个百分点。本项目所有提交文件都是正面概率。
+2. **必须用官方 `testData.tsv` 的 id**。从 aclImdb 重建的 id 形如 `0_2`，
+   官方是 `"12311_10"`，两者无法互相推导——用错 id 提交会被判无效。
+3. **不能复用 `pickle` 里的 `test_features`**。官方文件和重建版行数都是 25,000
+   但行顺序完全不同，复用就会拿 A 的预测配 B 的 id：文件格式完全正常、
+   分数等于随机。`tools/score_test.py` 和 `common.write_submission()` 都改成了
+   一律按当前 TSV 重新编码。
+
+> 顺便一提：官方 test 的 id 里那个 `_10`、`_2` 就是 IMDB 原始评分（≥7 正面、≤4 负面），
+> **标签直接写在 id 里**。所以这个竞赛的排行榜可以靠解析 id 刷到接近 1.0，
+> 参考价值有限；上表这些数字才是模型的真实水平。
 
 ### 阶段一的结果（Word2Vec 自训词向量）
 
@@ -201,9 +238,14 @@ tar xzf aclImdb_v1.tar.gz
 python tools/make_local_dataset.py --imdb-dir aclImdb --output-dir corpus/imdb
 ```
 
-Kaggle 的竞赛数据本来就是 aclImdb 的一个切分，列结构完全相同。
-唯一区别是重建出的 `id` 沿用原始文件名（形如 `12345_9`），行顺序和 Kaggle 官方文件
-不一致——**要提交排行榜请用方式 A**。
+Kaggle 的竞赛数据就是 aclImdb 的原始切分，正文逐条比对有 99.9% 命中（见下文验证）。
+唯一区别是重建出的 `id` 沿用 aclImdb 的文件名（形如 `0_2`），
+和官方的 `"12311_10"` 无法互相推导，行顺序也不同——**要提交排行榜请用方式 A**。
+
+> 本仓库实际用的是**混合配置**：`testData.tsv` 用官方文件（提交需要它的 id），
+> `labeledTrainData.tsv` / `unlabeledTrainData.tsv` 用重建版。
+> 原因是两份训练文件的行顺序不同会改变 8:2 划分的具体切法，
+> 而对比表里所有模型必须落在同一套划分上才可比。正文 99.9% 相同，不影响结论。
 
 **检查数据**（任务 3：行数、字段、空值、标签对应）：
 

@@ -89,10 +89,15 @@ def run_baseline(name: str, spec: dict, train_text: list[str], labels: np.ndarra
     test_x = full_vectorizer.transform(test_text)
     full_model = spec["model"]()
     full_model.fit(full_x, labels)
-    submission = pd.DataFrame({"id": test_ids, "sentiment": full_model.predict(test_x)})
+    # 交正面概率而不是 0/1：竞赛指标是 ROC-AUC，硬标签把概率信息全丢了。
+    # 标题行按官方 sampleSubmission.csv 带引号写。
+    test_probabilities = full_model.predict_proba(test_x)[:, 1]
     submission_path = common.RESULTS_DIR / f"{name}_submission.csv"
-    submission.to_csv(submission_path, index=False, quoting=csv.QUOTE_NONE)
-    logging.info("已写出 %s", submission_path.name)
+    with submission_path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write('"id","sentiment"\n')
+        for identifier, probability in zip(test_ids, test_probabilities):
+            handle.write(f"{identifier},{probability:.6f}\n")
+    logging.info("已写出 %s（%d 行，正面概率）", submission_path.name, len(test_ids))
 
     summary = {
         "model": name,

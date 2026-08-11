@@ -292,13 +292,28 @@ def predict_logits(model: nn.Module, features: torch.Tensor, device: torch.devic
 
 
 def write_submission(name: str, model: nn.Module, bundle: Bundle, device: torch.device) -> Path:
-    """用最佳模型对 testData.tsv 打分，生成 Kaggle 提交文件。"""
+    """用最佳模型对 testData.tsv 打分，生成 Kaggle 提交文件。
+
+    两个容易踩的坑：
+
+    1. **不能复用 `bundle.test_features`**。它是 `imdb_process.py` 跑的时候按当时那份
+       testData.tsv 的行顺序编码的。Kaggle 官方文件和从 aclImdb 重建的版本行数都是
+       25,000 但顺序完全不同——复用就会拿 A 的预测配 B 的 id，文件格式看着正常、
+       分数等于随机。所以一律按当前 TSV 重新编码。
+    2. **交概率而不是 0/1**。竞赛指标是 ROC-AUC，硬标签把概率信息全丢了，
+       实测能差好几个百分点。
+    """
     test = pd.read_csv(CORPUS_DIR / "testData.tsv", header=0, delimiter="\t", quoting=csv.QUOTE_NONE)
-    logits = predict_logits(model, bundle.test_features, device)
-    frame = pd.DataFrame({"id": test["id"], "sentiment": logits.argmax(dim=1).numpy()})
+    features = encode_texts(test["review"].tolist(), bundle.word_to_idx)
+    probabilities = torch.softmax(predict_logits(model, features, device), dim=1)[:, 1].numpy()
+
     path = RESULTS_DIR / f"{name}_submission.csv"
-    frame.to_csv(path, index=False, quoting=csv.QUOTE_NONE)
-    logging.info("已写出 %s（%d 行）", path.name, len(frame))
+    # 标题行按官方 sampleSubmission.csv 的写法带引号
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write('"id","sentiment"\n')
+        for identifier, probability in zip(test["id"], probabilities):
+            handle.write(f"{identifier},{probability:.6f}\n")
+    logging.info("已写出 %s（%d 行，正面概率）", path.name, len(test))
     return path
 
 

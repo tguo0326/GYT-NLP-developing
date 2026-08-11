@@ -139,18 +139,37 @@ def score_one(name: str, bundle: common.Bundle | None, test: pd.DataFrame,
     row = {"model": name}
 
     if truth is not None:
-        row["test_acc"] = round(float(accuracy_score(truth, predictions)), 4)
-        row["test_auc"] = round(float(roc_auc_score(truth, probabilities)), 4)
-        print(f"  测试集准确率 {row['test_acc']:.4f}   ROC-AUC {row['test_auc']:.4f}")
+        # 按正文对齐时会有几十条对不上（aclImdb 原文与官方文件的编码差异），
+        # 只在对上的那些行上算指标——把 NaN 一起送进 sklearn 会直接报错。
+        mask = truth.notna().to_numpy()
+        y_true = truth[mask].astype(int).to_numpy()
+        row["scored_rows"] = int(mask.sum())
+        row["test_acc"] = round(float(accuracy_score(y_true, predictions[mask])), 4)
+        row["test_auc"] = round(float(roc_auc_score(y_true, probabilities[mask])), 4)
+        print(f"  测试集准确率 {row['test_acc']:.4f}   ROC-AUC {row['test_auc']:.4f}"
+              f"   （在 {row['scored_rows']:,} / {len(test):,} 条有标签的行上）")
     else:
         print("  （无标签，只生成提交文件）")
 
     # Kaggle 的指标是 AUC，所以提交概率而不是 0/1
-    path = common.RESULTS_DIR / f"{name}_submission_proba.csv"
-    pd.DataFrame({"id": test["id"], "sentiment": probabilities}).to_csv(
-        path, index=False, quoting=csv.QUOTE_NONE)
+    path = common.RESULTS_DIR / f"{name}_submission.csv"
+    write_submission(path, test["id"], probabilities)
     print(f"  已写出 {path.name}")
     return row
+
+
+def write_submission(path: Path, ids: pd.Series, probabilities: np.ndarray) -> None:
+    """按 sampleSubmission.csv 的格式逐字节对齐地写出。
+
+    官方样例的标题行是带引号的 `"id","sentiment"`，id 字段本身也带引号
+    （我们用 QUOTE_NONE 读入，所以 id 字符串里已经含引号了）。
+    pandas 的 to_csv 不会给标题加引号，所以这里手写标题行。
+    Kaggle 对标题引号其实是宽容的，但和样例完全一致最省心。
+    """
+    with path.open("w", encoding="utf-8", newline="\n") as handle:
+        handle.write('"id","sentiment"\n')
+        for identifier, probability in zip(ids, probabilities):
+            handle.write(f"{identifier},{probability:.6f}\n")
 
 
 def main() -> None:

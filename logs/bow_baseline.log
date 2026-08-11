@@ -1,12 +1,12 @@
-2026-08-11 08:22:47,100 INFO model=bow_baseline device=cuda seed=42
-2026-08-11 08:22:47,126 INFO gpu: Tesla T4
-2026-08-11 08:22:51,898 INFO === bow_rf：Bag of Words (5,000 词频) + 随机森林 ===
-2026-08-11 08:23:03,861 INFO 特征矩阵 (20000, 5000)，稀疏度 2.3462%
-2026-08-11 08:23:03,862 INFO val_acc 0.8254  roc_auc 0.9123  训练 11.8s
-2026-08-11 08:23:22,585 INFO 已写出 bow_rf_submission.csv
-2026-08-11 08:23:22,585 INFO 已写出 bow_rf_summary.json
-2026-08-11 08:23:22,594 INFO === tfidf_lr：TF-IDF (1-2gram, 200,000) + 逻辑回归 ===
-2026-08-11 08:23:38,976 INFO 特征矩阵 (20000, 200000)，稀疏度 0.1411%
-2026-08-11 08:23:38,976 INFO val_acc 0.8952  roc_auc 0.9616  训练 16.4s
-2026-08-11 08:24:06,556 INFO 已写出 tfidf_lr_submission.csv
-2026-08-11 08:24:06,556 INFO 已写出 tfidf_lr_summary.json
+2026-08-11 11:43:50,063 INFO model=bow_baseline device=cuda seed=42
+2026-08-11 11:43:50,088 INFO gpu: Tesla T4
+2026-08-11 11:43:54,903 INFO === bow_rf：Bag of Words (5,000 词频) + 随机森林 ===
+2026-08-11 11:44:06,766 INFO 特征矩阵 (20000, 5000)，稀疏度 2.3462%
+2026-08-11 11:44:06,767 INFO val_acc 0.8254  roc_auc 0.9123  训练 11.7s
+2026-08-11 11:44:25,580 INFO 已写出 bow_rf_submission.csv（25000 行，正面概率）
+2026-08-11 11:44:25,580 INFO 已写出 bow_rf_summary.json
+2026-08-11 11:44:25,590 INFO === tfidf_lr：TF-IDF (1-2gram, 200,000) + 逻辑回归 ===
+2026-08-11 11:44:41,834 INFO 特征矩阵 (20000, 200000)，稀疏度 0.1411%
+2026-08-11 11:44:41,835 INFO val_acc 0.8952  roc_auc 0.9616  训练 16.2s
+2026-08-11 11:45:09,379 INFO 已写出 tfidf_lr_submission.csv（25000 行，正面概率）
+2026-08-11 11:45:09,380 INFO 已写出 tfidf_lr_summary.json

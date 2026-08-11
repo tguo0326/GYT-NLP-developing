@@ -1,2 +1,11 @@
-model,test_acc,test_auc
-roberta,0.9371,0.9835
+model,scored_rows,test_acc,test_auc
+roberta,24961,0.9369,0.9834
+bert,24961,0.9174,0.9746
+distilbert,24961,0.9094,0.9703
+attention_lstm,24961,0.9027,0.965
+capsule_lstm,24961,0.9036,0.9648
+cnnlstm,24961,0.8998,0.9637
+gru,24961,0.8985,0.963
+lstm,24961,0.8975,0.9629
+cnn,24961,0.8858,0.9579
+transformer,24961,0.8815,0.9541
