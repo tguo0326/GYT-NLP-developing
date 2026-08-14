@@ -1,0 +1,14 @@
+{
+  "model": "capsule_lstm",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.892,
+  "best_epoch": 5,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30694910,
+  "trainable_params": 868610,
+  "train_seconds": 250.5,
+  "seconds_per_epoch": 25.1,
+  "device": "cuda",
+  "checkpoint": "models/capsule_lstm_best.pt"
+}

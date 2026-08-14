@@ -1,0 +1,23 @@
+{
+  "model": "deberta_adalora",
+  "method": "AdaLoRA",
+  "text_representation": "microsoft/deberta-v3-large + AdaLoRA（冻结底座）",
+  "best_val_acc": 0.9504,
+  "best_epoch": 2,
+  "epochs": 2,
+  "batch_size": 32,
+  "grad_accum": 1,
+  "effective_batch": 32,
+  "max_length": 384,
+  "learning_rate": 0.0005,
+  "gradient_checkpointing": true,
+  "total_params": 439262772,
+  "trainable_params": 4198914,
+  "trainable_pct": 0.9559,
+  "adapter_mb": 20.7,
+  "peak_gpu_gb": 4.87,
+  "train_seconds": 3350.1,
+  "seconds_per_epoch": 1675.0,
+  "device": "cuda",
+  "checkpoint": "models/deberta_adalora_peft"
+}

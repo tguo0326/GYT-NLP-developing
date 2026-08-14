@@ -17,17 +17,17 @@ import torch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import common  # noqa: E402
-import imdb_attention_lstm  # noqa: E402
-import imdb_capsule_lstm  # noqa: E402
-import imdb_cnn  # noqa: E402
-import imdb_cnnlstm  # noqa: E402
-import imdb_gru  # noqa: E402
-import imdb_lstm  # noqa: E402
-import imdb_transformer  # noqa: E402
+from core import common  # noqa: E402
+from experiments.glove import attention_lstm  # noqa: E402
+from experiments.glove import capsule_lstm  # noqa: E402
+from experiments.glove import cnn  # noqa: E402
+from experiments.glove import cnnlstm  # noqa: E402
+from experiments.glove import gru  # noqa: E402
+from experiments.glove import lstm  # noqa: E402
+from experiments.glove import transformer  # noqa: E402
 
-MODULES = [imdb_cnn, imdb_lstm, imdb_gru, imdb_cnnlstm,
-           imdb_attention_lstm, imdb_transformer, imdb_capsule_lstm]
+MODULES = [cnn, lstm, gru, cnnlstm,
+           attention_lstm, transformer, capsule_lstm]
 VOCAB, EMBED, BATCH, SEQ = 200, 300, 6, 64
 
 
@@ -88,7 +88,7 @@ def test_padding_does_not_change_prediction(module, weight, batch):
 def test_attention_weights_sum_to_one(weight, batch):
     """注意力权重必须沿**时间轴**归一化。原代码 softmax(dim=1) 归一化到了 batch 维，
     表现就是「每列和为 1」而不是「每行和为 1」，batch_size 一改结果就变。"""
-    model = imdb_attention_lstm.SentimentNet(weight).eval()
+    model = attention_lstm.SentimentNet(weight).eval()
     with torch.no_grad():
         _logits, weights = model.encode(batch)
     assert weights.shape[0] == BATCH
@@ -101,7 +101,7 @@ def test_capsule_squash_keeps_length_below_one():
     """squash 后向量长度必须落在 (0, 1)——长度就是「特征存在的置信度」。
     原代码写的是纯 L2 归一化，所有长度都恰好等于 1，置信度信息被抹平。"""
     tensor = torch.randn(4, 8, 16) * 10
-    squashed = imdb_capsule_lstm.Capsule.squash(tensor)
+    squashed = capsule_lstm.Capsule.squash(tensor)
     norms = squashed.norm(dim=-1)
     assert (norms > 0).all() and (norms < 1).all()
 

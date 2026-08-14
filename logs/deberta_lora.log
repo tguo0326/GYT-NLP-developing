@@ -1,0 +1,42 @@
+2026-08-14 11:14:56,490 INFO model=deberta_lora device=cuda seed=42
+2026-08-14 11:14:56,516 INFO gpu: Tesla T4
+2026-08-14 11:14:56,680 INFO 显存上限 13.5 GB / 14.6 GB（fraction=0.927）
+2026-08-14 11:14:56,681 INFO LoRA on microsoft/deberta-v3-large：batch=32 × accum=1（等效 32）, max_length=384, lr=0.0001, epochs=2, checkpointing=True, fp16=True
+2026-08-14 11:14:58,493 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-14 11:15:14,020 INFO [mem] base_loaded    显存峰值 0.00 GB  主机内存 3.08 GB
+2026-08-14 11:15:14,093 INFO 参数量: 总计 437,688,324, 可训练 2,624,514（0.600%）
+2026-08-14 11:15:14,094 INFO [mem] peft_wrapped   显存峰值 0.00 GB  主机内存 3.08 GB
+2026-08-14 11:15:22,594 INFO [mem] train_begin    显存峰值 1.65 GB  主机内存 2.51 GB
+2026-08-14 12:07:43,058 INFO [mem] train_end      显存峰值 4.80 GB  主机内存 2.62 GB
+2026-08-14 12:07:43,059 INFO [mem] after_train    显存峰值 4.80 GB  主机内存 2.62 GB
+2026-08-14 12:07:43,059 INFO 验证准确率 0.9570，训练 3148.5s，显存峰值 4.80 GB
+2026-08-14 12:07:43,627 INFO 已保存 adapter 到 /home/ubuntu/科研专用/NLP/models/deberta_lora_peft（20.6 MB）
+2026-08-14 12:07:43,627 INFO step 50     epoch 0.08  train_loss 0.7009  lr 6.53e-05
+2026-08-14 12:07:43,627 INFO step 100    epoch 0.16  train_loss 0.6506  lr 9.80e-05
+2026-08-14 12:07:43,627 INFO step 150    epoch 0.24  train_loss 0.3050  lr 9.38e-05
+2026-08-14 12:07:43,627 INFO step 200    epoch 0.32  train_loss 0.1898  lr 8.95e-05
+2026-08-14 12:07:43,627 INFO step 250    epoch 0.40  train_loss 0.1686  lr 8.53e-05
+2026-08-14 12:07:43,627 INFO step 300    epoch 0.48  train_loss 0.1727  lr 8.10e-05
+2026-08-14 12:07:43,627 INFO step 350    epoch 0.56  train_loss 0.1459  lr 7.68e-05
+2026-08-14 12:07:43,627 INFO step 400    epoch 0.64  train_loss 0.1564  lr 7.25e-05
+2026-08-14 12:07:43,627 INFO step 450    epoch 0.72  train_loss 0.1273  lr 6.83e-05
+2026-08-14 12:07:43,627 INFO step 500    epoch 0.80  train_loss 0.1519  lr 6.40e-05
+2026-08-14 12:07:43,627 INFO step 550    epoch 0.88  train_loss 0.1298  lr 5.97e-05
+2026-08-14 12:07:43,627 INFO step 600    epoch 0.96  train_loss 0.1422  lr 5.55e-05
+2026-08-14 12:07:43,627 INFO epoch 1.00  val_loss 0.1408  val_acc 0.9518  104.8s
+2026-08-14 12:07:43,627 INFO step 650    epoch 1.04  train_loss 0.1224  lr 5.12e-05
+2026-08-14 12:07:43,627 INFO step 700    epoch 1.12  train_loss 0.1186  lr 4.70e-05
+2026-08-14 12:07:43,627 INFO step 750    epoch 1.20  train_loss 0.1216  lr 4.27e-05
+2026-08-14 12:07:43,628 INFO step 800    epoch 1.28  train_loss 0.1184  lr 3.85e-05
+2026-08-14 12:07:43,628 INFO step 850    epoch 1.36  train_loss 0.1138  lr 3.42e-05
+2026-08-14 12:07:43,628 INFO step 900    epoch 1.44  train_loss 0.0934  lr 3.00e-05
+2026-08-14 12:07:43,628 INFO step 950    epoch 1.52  train_loss 0.1207  lr 2.57e-05
+2026-08-14 12:07:43,628 INFO step 1000   epoch 1.60  train_loss 0.1233  lr 2.14e-05
+2026-08-14 12:07:43,628 INFO step 1050   epoch 1.68  train_loss 0.0924  lr 1.72e-05
+2026-08-14 12:07:43,628 INFO step 1100   epoch 1.76  train_loss 0.1135  lr 1.29e-05
+2026-08-14 12:07:43,628 INFO step 1150   epoch 1.84  train_loss 0.1226  lr 8.68e-06
+2026-08-14 12:07:43,628 INFO step 1200   epoch 1.92  train_loss 0.1055  lr 4.43e-06
+2026-08-14 12:07:43,628 INFO step 1250   epoch 2.00  train_loss 0.1136  lr 1.70e-07
+2026-08-14 12:07:43,628 INFO epoch 2.00  val_loss 0.1298  val_acc 0.9570  104.7s
+2026-08-14 12:22:00,423 INFO 已写出 deberta_lora_submission.csv（25000 行）
+2026-08-14 12:22:00,424 INFO 已写出 deberta_lora_summary.json

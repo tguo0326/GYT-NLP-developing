@@ -1,11 +1,17 @@
 model,scored_rows,test_acc,test_auc
+deberta_lora,24961,0.9633,0.9924
+deberta_ptuning,24961,0.9537,0.9906
+deberta_adalora,24961,0.9607,0.9904
 roberta,24961,0.9369,0.9834
 bert,24961,0.9174,0.9746
 distilbert,24961,0.9094,0.9703
+tfidf_lr,24961,0.9055,0.9666
 attention_lstm,24961,0.9027,0.965
 capsule_lstm,24961,0.9036,0.9648
 cnnlstm,24961,0.8998,0.9637
 gru,24961,0.8985,0.963
 lstm,24961,0.8975,0.9629
+deberta_prefix,24961,0.8964,0.9608
 cnn,24961,0.8858,0.9579
 transformer,24961,0.8815,0.9541
+bow_rf,24961,0.8419,0.9204

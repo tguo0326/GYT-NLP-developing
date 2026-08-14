@@ -1,0 +1,23 @@
+{
+  "model": "deberta_lora",
+  "method": "LoRA",
+  "text_representation": "microsoft/deberta-v3-large + LoRA（冻结底座）",
+  "best_val_acc": 0.957,
+  "best_epoch": 2,
+  "epochs": 2,
+  "batch_size": 32,
+  "grad_accum": 1,
+  "effective_batch": 32,
+  "max_length": 384,
+  "learning_rate": 0.0001,
+  "gradient_checkpointing": true,
+  "total_params": 437688324,
+  "trainable_params": 2624514,
+  "trainable_pct": 0.5996,
+  "adapter_mb": 20.6,
+  "peak_gpu_gb": 4.8,
+  "train_seconds": 3148.5,
+  "seconds_per_epoch": 1574.2,
+  "device": "cuda",
+  "checkpoint": "models/deberta_lora_peft"
+}

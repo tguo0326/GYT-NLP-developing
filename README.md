@@ -1,239 +1,141 @@
-<div align="center">
+# IMDB 情感分类：从词频统计到 LoRA
 
-<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=28&duration=3200&pause=800&color=4C72B0&center=true&vCenter=true&width=820&lines=Bag+of+Words+%E2%86%92+Word2Vec+%E2%86%92+GloVe+%E2%86%92+BERT;%E8%AF%8D%E5%90%91%E9%87%8F%E6%98%AF%E6%80%8E%E4%B9%88%E4%B8%80%E6%AD%A5%E6%AD%A5%E8%B5%B0%E5%88%B0%E5%A4%A7%E6%A8%A1%E5%9E%8B%E7%9A%84%EF%BC%9F;IMDB+%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB+%C2%B7+11+%E4%B8%AA%E6%A8%A1%E5%9E%8B%E5%AE%8C%E6%95%B4%E5%AF%B9%E6%AF%94" alt="Typing SVG" />
+同一份 IMDB 影评数据（25,000 条标注 / 25,000 条测试），同一套划分和评测口径，
+跑通 16 种做法：词频统计 → 静态词向量 + 各种网络 → 预训练模型全量微调 → 参数高效微调。
 
-# GYT · NLP Developing
+想回答的问题是：准确率是靠什么涨上去的，代价是多少参数和多少时间。
 
-**从词频统计到预训练模型 —— 一条完整可运行的 NLP 文本分类路径**
+## 结果
 
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.1+-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
-[![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-F7931E?style=flat-square&logo=scikitlearn&logoColor=white)](https://scikit-learn.org/)
-[![gensim](https://img.shields.io/badge/gensim-4.x-2A9D8F?style=flat-square)](https://radimrehurek.com/gensim/)
-[![Kaggle](https://img.shields.io/badge/Kaggle-Notebook_Ready-20BEFF?style=flat-square&logo=kaggle&logoColor=white)](https://www.kaggle.com/competitions/word2vec-nlp-tutorial)
-
-</div>
-
----
-
-## 项目目标
-
-在同一份 IMDB 影评数据（25,000 条标注 / 25,000 条测试）上，用**完全一致的划分、
-清洗和评测口径**跑通从最简单到最先进的一整条文本分类路径，并回答一个问题：
-
-> 文本表示方法（词频 → 静态词向量 → 上下文词向量）和模型结构（线性 → CNN → RNN →
-> Attention → Transformer）各自贡献了多少准确率？代价是多少参数和多少训练时间？
-
-**一句话结论**：准确率的三级台阶 **0.83（词频）→ 0.89（GloVe / TF-IDF）→ 0.93（BERT 系）**
-全部来自文本表示的换代；同一级里换模型结构只在 0.6 个百分点内浮动。
-
-具体分两个阶段：
-
-| | 内容 | 代码位置 |
-|---|---|---|
-| **阶段一** | Kaggle 入门教程的 Python 3 复现：Bag of Words / 自训 Word2Vec / 文档向量 / TF-IDF | `kaggle_tutorial/`、`notebooks/` |
-| **阶段二** | GloVe 840B.300d + CNN / LSTM / GRU / CNN-LSTM / Attention-LSTM / Transformer / Capsule-LSTM，以及 BERT / DistilBERT / RoBERTa 微调 | 根目录 `imdb_*.py` |
-
-阶段一对应的原教程写于 2014 年、基于 Python 2.7，代码在今天的环境里已经跑不起来
-（`print` 语句、`sklearn.cross_validation`、gensim 3.x API 全部失效）。
-阶段二的原始代码有 5 处**不报错但训不出来**的错误，
-见[遇到的问题及解决办法](#遇到的问题及解决办法)。
-
-```mermaid
-flowchart LR
-    A["📝 原始影评"] --> B["🧹 清洗 + 分词"]
-    B --> C["📊 Bag of Words<br/>TF-IDF<br/><i>稀疏 · 不可迁移</i>"]
-    B --> D["🧠 Word2Vec<br/><i>自训 7.5 万条</i>"]
-    B --> E["🌍 GloVe 840B<br/><i>预训练 · 静态</i>"]
-    B --> F["🤖 BERT 系<br/><i>上下文相关</i>"]
-    C --> G["随机森林<br/>逻辑回归"]
-    D --> H["向量平均<br/>语义簇计数"]
-    E --> I["CNN / LSTM / GRU<br/>Attention / Transformer"]
-    F --> J["全模型微调"]
-    G --> K["🎯 情感预测"]
-    H --> K
-    I --> K
-    J --> K
-
-    style C fill:#4c72b0,color:#fff,stroke:none
-    style D fill:#2a9d8f,color:#fff,stroke:none
-    style E fill:#9c6ade,color:#fff,stroke:none
-    style F fill:#e76f51,color:#fff,stroke:none
-    style K fill:#333,color:#fff,stroke:none
-```
-
-## 实验结果对比表
-
-统一口径：25,000 条标注影评按 8:2 **分层**划分（`random_state=42`），
-20,000 训练 / 5,000 验证。神经网络共用 `pickle/imdb_glove.pickle3`，
-定长填充 512，Embedding 用 GloVe 840B.300d 初始化并**冻结**。
-GPU 为单卡 Tesla T4。表格由 `python tools/collect_results.py` 自动生成，
-完整版见 [`results/comparison.md`](results/comparison.md)。
+指标全部是**测试集**：官方 `testData.tsv` 的 25,000 条，其中 24,961 条能与 Stanford
+aclImdb 的公开标签按正文对齐，指标在这些行上算。验证集只用来选 epoch，不进表。
+单卡 Tesla T4。
 
 <!-- RESULTS_TABLE_START -->
 
-| 模型 | 文本表示 | 验证集准确率 | 训练时间 | 参数量 | 可训练参数 | 最佳 epoch |
-| --- | --- | --: | --: | --: | --: | --: |
-| 传统分类器（随机森林） | Bag of Words (5,000 词频) | 0.8254 | 12 s | 5,000 | 5,000 | — |
-| 传统分类器（逻辑回归） | TF-IDF (1-2gram, 200,000) | 0.8952 | 16 s | 200,000 | 200,000 | — |
-| CNN | GloVe 840B.300d | 0.8876 | 98 s | 30,288,254 | 461,954 | 5 |
-| LSTM | GloVe 840B.300d | 0.8894 | 293 s | 30,579,902 | 753,602 | 4 |
-| GRU | GloVe 840B.300d | 0.8936 | 283 s | 30,391,742 | 565,442 | 7 |
-| CNN-LSTM | GloVe 840B.300d | 0.8910 | 64 s | 30,140,798 | 314,498 | 4 |
-| Attention-LSTM | GloVe 840B.300d | 0.8922 | 305 s | 30,728,702 | 902,402 | 4 |
-| Transformer | GloVe 840B.300d | 0.8760 | 701 s | 31,168,326 | 1,342,026 | 4 |
-| Capsule-LSTM | GloVe 840B.300d | 0.8920 | 250 s | 30,694,910 | 868,610 | 5 |
-| BERT | bert-base-uncased 上下文词向量（全模型微调） | 0.9194 | 544 s | 109,483,778 | 109,483,778 | 3 |
-| DistilBERT | distilbert-base-uncased 上下文词向量（全模型微调） | 0.9090 | 242 s | 66,955,010 | 66,955,010 | 3 |
-| RoBERTa | roberta-base 上下文词向量（全模型微调） | 0.9292 | 555 s | 124,647,170 | 124,647,170 | 2 |
+| 模型 | 文本表示 | 测试集准确率 | ROC-AUC | 可训练参数 | 训练时间 |
+| --- | --- | --: | --: | --: | --: |
+| LoRA | DeBERTa-v3-large，冻结底座 | 0.9633 | 0.9924 | 2,624,514 | 3148 s |
+| P-Tuning | DeBERTa-v3-large，冻结底座 | 0.9537 | 0.9906 | 302,338 | 3250 s |
+| AdaLoRA | DeBERTa-v3-large，冻结底座 | 0.9607 | 0.9904 | 4,198,914 | 3350 s |
+| RoBERTa | 全量微调 | 0.9369 | 0.9834 | 124,647,170 | 555 s |
+| BERT | 全量微调 | 0.9174 | 0.9746 | 109,483,778 | 544 s |
+| DistilBERT | 全量微调 | 0.9094 | 0.9703 | 66,955,010 | 242 s |
+| 逻辑回归 | TF-IDF（1-2gram, 200,000） | 0.9055 | 0.9666 | 200,000 | 16 s |
+| Attention-LSTM | GloVe 840B.300d | 0.9027 | 0.9650 | 902,402 | 305 s |
+| Capsule-LSTM | GloVe 840B.300d | 0.9036 | 0.9648 | 868,610 | 250 s |
+| CNN-LSTM | GloVe 840B.300d | 0.8998 | 0.9637 | 314,498 | 64 s |
+| BiGRU | GloVe 840B.300d | 0.8985 | 0.9630 | 565,442 | 283 s |
+| BiLSTM | GloVe 840B.300d | 0.8975 | 0.9629 | 753,602 | 293 s |
+| Prefix-Tuning | RoBERTa-base，冻结底座 | 0.8964 | 0.9608 | 960,770 | 1083 s |
+| TextCNN | GloVe 840B.300d | 0.8858 | 0.9579 | 461,954 | 98 s |
+| Transformer | GloVe 840B.300d | 0.8815 | 0.9541 | 1,342,026 | 701 s |
+| 随机森林 | Bag of Words（5,000 词频） | 0.8419 | 0.9204 | 5,000 | 12 s |
 
-### 全部模型
-
-- **准确率最高**：RoBERTa，0.9292
-- **训练最快**：传统分类器（随机森林），12 秒
-- **可训练参数最少**：传统分类器（随机森林），5,000
-- **综合最好**：BERT（准确率 0.9194，训练 544 秒——在距最高准确率 1 个百分点以内的模型里训练时间最短）
-
-### 只看神经网络模型
-
-- **准确率最高**：RoBERTa，0.9292
-- **训练最快**：CNN-LSTM，64 秒
-- **可训练参数最少**：CNN-LSTM，314,498
-- **综合最好**：BERT（准确率 0.9194，训练 544 秒——在距最高准确率 1 个百分点以内的模型里训练时间最短）
+- 最好的是 **LoRA**：准确率 0.9633，AUC 0.9924
+- 比最好的全量微调（RoBERTa 0.9369）高 2.64 个百分点，可训练参数只有它的 1/47
+- 最省的是 **P-Tuning**：302,338 个参数（0.07%）拿到 0.9537
 
 <!-- RESULTS_TABLE_END -->
 
-### 测试集分数（25,000 条，模型从未见过）
+三条结论：
 
-上表是**验证集**的数字（用于选型）。Stanford aclImdb 的测试集标签是公开的，
-所以本地就能算出真正的测试集分数——不用等 Kaggle 排行榜：
+1. 准确率的台阶来自文本表示，不是网络结构。0.84（词频）→ 0.90（GloVe）→
+   0.93（BERT 系上下文词向量）→ 0.96（更大的底座）。同一级里换结构只在 1 个百分点内浮动，
+   七个 GloVe 模型全部落在 0.88~0.90。
+2. TF-IDF 加逻辑回归 0.9055，16 秒，比七个 GloVe 神经网络里的六个都高。
+   上手新任务先把这条基线跑出来。
+3. 参数高效微调不是省钱的妥协，是让小卡用得上大底座的手段。全量微调 4.37 亿参数的
+   DeBERTa-v3-large，光权重加 Adam 状态就要 7 GB，T4 上再加 activation 基本没戏；
+   挂上 LoRA 只训 0.6%，峰值 4.8 GB。
 
-```bash
-python tools/score_test.py --model all      # → results/test_scores.csv
-```
+### 参数高效微调
 
-在 Kaggle **官方** `testData.tsv` 的 25,000 条上评估（其中 24,961 条能与 aclImdb
-的公开标签按正文对齐，指标就在这些行上算）：
+<!-- PEFT_TABLE_START -->
 
-| 模型 | 测试集准确率 | ROC-AUC |
-|---|--:|--:|
-| **RoBERTa** | **0.9369** | **0.9834** |
-| BERT | 0.9174 | 0.9746 |
-| DistilBERT | 0.9094 | 0.9703 |
-| Capsule-LSTM | 0.9036 | 0.9648 |
-| Attention-LSTM | 0.9027 | 0.9650 |
-| CNN-LSTM | 0.8998 | 0.9637 |
-| GRU | 0.8985 | 0.9630 |
-| LSTM | 0.8975 | 0.9629 |
-| CNN | 0.8858 | 0.9579 |
-| Transformer | 0.8815 | 0.9541 |
+| 方法 | 测试集准确率 | ROC-AUC | 可训练参数 | 占全模型 | 显存峰值 | adapter |
+| --- | --: | --: | --: | --: | --: | --: |
+| LoRA | 0.9633 | 0.9924 | 2,624,514 | 0.60% | 4.80 GB | 21 MB |
+| P-Tuning | 0.9537 | 0.9906 | 302,338 | 0.07% | 4.93 GB | 11 MB |
+| AdaLoRA | 0.9607 | 0.9904 | 4,198,914 | 0.96% | 4.87 GB | 21 MB |
+| Prefix-Tuning | 0.8964 | 0.9608 | 960,770 | 0.76% | 3.96 GB | 8 MB |
 
-测试集准确率普遍比验证集高 0.5~1 个百分点。这不是异常——验证集只有 5,000 条，
-本身就有约 ±0.9% 的抽样波动，25,000 条的测试集估计更稳。
-**排序和验证集完全一致**，说明选型没有过拟合验证集。
+<!-- PEFT_TABLE_END -->
 
-#### Kaggle 的划分就是 aclImdb 的原始划分（已验证）
+Prefix-Tuning 那行的底座是 RoBERTa-base 而不是 DeBERTa，所以不和前三行比准确率。
+它在 DeBERTa 上跑不了：peft 通过 `past_key_values` 注入前缀，而 DeBERTa 是纯 encoder，
+没有 KV cache。
 
-用官方文件逐条比对正文（比之前先把官方文件里转义的 `\"` 还原）：
+显存那一栏是这一阶段最实在的收获。同样三招（冻结底座、gradient checkpointing、
+小 batch 配梯度累积），15.7 亿参数的 `deberta-v2-xxlarge` 在 T4 上峰值只要 3.49 GB，
+而全量微调它需要约 25 GB。没拿它做主实验是因为一个 epoch 要 1.9 小时。
+原理和实测数据见 [docs/peft-lora.md](docs/peft-lora.md)。
 
-```
-官方 labeledTrainData  ∩ aclImdb-train : 24,878 / 24,904  (99.90%)
-官方 testData          ∩ aclImdb-test  : 24,763 / 24,801  (99.85%)
-官方 testData          ∩ aclImdb-train :    123 / 24,801  ( 0.50%)  ← aclImdb 自带的重复噪声
-能按正文对上的部分，标签一致率 100.0000%
-```
+## 提交文件
 
-所以上表就是排行榜同源的分数，**不需要真的提交也能知道成绩**。
-（第一次比对只有 53% 命中，原因是官方文件把正文里的引号转义成了 `\"`，
-而 aclImdb 原文是裸引号——纯格式差异，不是两批数据。）
+`submissions/` 下每个方法一个子目录，各含 `submission.csv`、`summary.json` 和说明。
+竞赛指标是 ROC-AUC，所以交的是正面情感概率而不是 0/1 标签，交硬标签会差 3~5 个点。
+最好的一份是 `submissions/16_lora/submission.csv`。
 
-### 提交到 Kaggle
-
-提交文件已经生成好了，**直接上传即可**：
+## 目录结构
 
 ```
-results/roberta_submission.csv        ← 最好的模型，AUC 0.9834
+core/                共享实现
+  common.py            数据加载、训练循环、设备与种子、日志、提交文件
+  hf_trainer.py        BERT 系全量微调
+  peft_trainer.py      LoRA / AdaLoRA / P-Tuning / Prefix-Tuning
+  mem_guard.py         显存与内存看门狗，越线主动中止
+experiments/         运行入口
+  preprocess.py        清洗、建词表、GloVe 初始化，产出 pickle
+  baseline.py          Bag of Words 与 TF-IDF
+  glove/               七个 GloVe 神经网络
+  finetune/            BERT / DistilBERT / RoBERTa
+  peft/                lora / adalora / ptuning / prefix
+tools/               数据体检、GloVe 转换、打分、汇总
+tests/               pytest 65 项，不需要 GPU，约 6 秒
+docs/                原理笔记与踩坑记录
+submissions/         16 份 Kaggle 提交文件，按方法分目录
+results/             分数、逐 epoch 指标、对比表
+kaggle_tutorial/     Kaggle 入门教程的 Python 3 复现
+notebooks/           可直接导入 Kaggle 的 Notebook
 ```
 
-12 个模型每个都有一份，格式与官方 `sampleSubmission.csv` 完全对齐：
+需要自己准备的四个目录都在 `.gitignore` 里：`corpus/imdb/`、`glove/`、`pickle/`、`models/`。
 
-```
-"id","sentiment"
-"12311_10",0.998316
-"8348_2",0.001879
-```
-
-要重新生成：`python tools/score_test.py --model roberta`（或 `--model all`）。
-
-**三个容易踩的坑**：
-
-1. **交概率，不要交 0/1**。竞赛指标是 ROC-AUC，硬标签把置信度信息全丢了，
-   实测差好几个百分点。本项目所有提交文件都是正面概率。
-2. **必须用官方 `testData.tsv` 的 id**。从 aclImdb 重建的 id 形如 `0_2`，
-   官方是 `"12311_10"`，两者无法互相推导——用错 id 提交会被判无效。
-3. **不能复用 `pickle` 里的 `test_features`**。官方文件和重建版行数都是 25,000
-   但行顺序完全不同，复用就会拿 A 的预测配 B 的 id：文件格式完全正常、
-   分数等于随机。`tools/score_test.py` 和 `common.write_submission()` 都改成了
-   一律按当前 TSV 重新编码。
-
-> 顺便一提：官方 test 的 id 里那个 `_10`、`_2` 就是 IMDB 原始评分（≥7 正面、≤4 负面），
-> **标签直接写在 id 里**。所以这个竞赛的排行榜可以靠解析 id 刷到接近 1.0，
-> 参考价值有限；上表这些数字才是模型的真实水平。
-
-### 阶段一的结果（Word2Vec 自训词向量）
-
-| 方法 | 特征维度 | Accuracy | ROC-AUC |
-|---|--:|--:|--:|
-| Part 1 · Bag of Words + 随机森林 | 5,000 | 0.8394 | 0.9140 |
-| Part 3-A · Word2Vec 向量平均 + 随机森林 | 300 | 0.7994 | 0.8782 |
-| Part 3-B · Word2Vec 语义簇计数 + 随机森林 | 3,298 | 0.8292 | 0.9070 |
-| Part 4 · TF-IDF (1-2gram) + 逻辑回归 | 200,000 | **0.8918** | **0.9576** |
-
-> 阶段一用的是 `kaggle_tutorial/imdb.py` 的清洗流程（**去停用词**），阶段二为了和神经网络保持
-> 完全一致而用 `common.review_to_wordlist`（**不去停用词**）。所以对比表里的
-> `bow_rf` = 0.8254 与这里的 Part 1 = 0.8394 有差距，差异来自停用词处理，
-> 不是实现不同。详见 [`docs/results.md`](docs/results.md)。
-
-## 环境安装
+## 安装
 
 ```bash
 git clone https://github.com/tguo0326/GYT-NLP-developing.git
 cd GYT-NLP-developing
-
-python -m venv .venv && source .venv/bin/activate     # Windows: .venv\Scripts\activate
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**GPU（可选但强烈建议）**：`requirements.txt` 里的 `torch` 是 CPU 版。
-要用 CUDA，按官网索引重装：
+`requirements.txt` 里的 torch 是 CPU 版，要用 CUDA 按官网索引重装：
 
 ```bash
 pip install torch --index-url https://download.pytorch.org/whl/cu121
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
 ```
 
-代码通过 `common.get_device()` 自动选择 CUDA / MPS / CPU，**没有 GPU 也能跑**，
-只是 LSTM 系会慢 20~50 倍。阶段一（BoW / TF-IDF / Word2Vec）全程不需要 GPU。
+没有 GPU 也能跑，LSTM 系慢 20~50 倍，参数高效微调那四个基本跑不动。
+GloVe 准备阶段磁盘峰值约 10 GB，转换完删掉 zip 和 txt 后长期占用 2.5 GB。
 
-**磁盘**：GloVe 准备阶段峰值占用约 10 GB（zip 2.1 GB + txt 5.3 GB + kv 2.5 GB），
-转换完成后可以删掉 zip 和 txt，长期占用约 2.5 GB。
+## 数据
 
-## 数据集与 GloVe 下载
+### IMDB 到 `corpus/imdb/`
 
-### 1. IMDB 数据 → `corpus/imdb/`
+要 `labeledTrainData.tsv`、`testData.tsv`、`unlabeledTrainData.tsv` 三份。
 
-需要三份文件：`labeledTrainData.tsv`、`testData.tsv`、`unlabeledTrainData.tsv`。
-
-**方式 A · Kaggle 官方文件（要提交排行榜就用这个）**
+用 Kaggle 官方文件（要提交排行榜就用这个）：
 
 ```bash
 # 先在 https://www.kaggle.com/competitions/word2vec-nlp-tutorial 点 Join Competition
-pip install kaggle        # 并把 API token 放到 ~/.kaggle/kaggle.json
+pip install kaggle        # API token 放到 ~/.kaggle/kaggle.json
 kaggle competitions download -c word2vec-nlp-tutorial -p corpus/imdb
 cd corpus/imdb && unzip '*.zip' && cd ../..
 ```
 
-**方式 B · 从公开的 Stanford aclImdb 语料重建（无需 Kaggle 账号）**
+或者从公开的 Stanford aclImdb 重建，不需要 Kaggle 账号：
 
 ```bash
 curl -O https://ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
@@ -241,325 +143,117 @@ tar xzf aclImdb_v1.tar.gz
 python tools/make_local_dataset.py --imdb-dir aclImdb --output-dir corpus/imdb
 ```
 
-Kaggle 的竞赛数据就是 aclImdb 的原始切分，正文逐条比对有 99.9% 命中（见下文验证）。
-唯一区别是重建出的 `id` 沿用 aclImdb 的文件名（形如 `0_2`），
-和官方的 `"12311_10"` 无法互相推导，行顺序也不同——**要提交排行榜请用方式 A**。
-
-> 本仓库实际用的是**混合配置**：`testData.tsv` 用官方文件（提交需要它的 id），
-> `labeledTrainData.tsv` / `unlabeledTrainData.tsv` 用重建版。
-> 原因是两份训练文件的行顺序不同会改变 8:2 划分的具体切法，
-> 而对比表里所有模型必须落在同一套划分上才可比。正文 99.9% 相同，不影响结论。
-
-**检查数据**（任务 3：行数、字段、空值、标签对应）：
+竞赛数据就是 aclImdb 的原始切分，正文逐条比对 99.9% 命中。区别在于重建出的 `id`
+沿用 aclImdb 的文件名（形如 `0_2`），和官方的 `"12311_10"` 无法互推，行顺序也不同。
+本仓库用的是混合配置：`testData.tsv` 用官方文件（提交需要它的 id），两份训练文件用重建版。
+训练文件行顺序不同会改变 8:2 划分的具体切法，而所有模型必须落在同一套划分上才可比。
 
 ```bash
-python tools/check_imdb_data.py
+python tools/check_imdb_data.py     # 行数、字段、空值、标签分布
 ```
 
-```text
-=== corpus/imdb/labeledTrainData.tsv ===
-  行数     : 25,000
-  字段     : ['id', 'sentiment', 'review']
-  评论长度 : 均值 233.8 词，中位数 174，最长 2470，最短 10
-  标签分布 : 负面 12,500 / 正面 12,500
-  ✓ 行数、字段、空值、id 唯一性、标签取值全部正常
-```
-
-### 2. GloVe 词向量 → `glove/`
+### GloVe 到 `glove/`
 
 ```bash
 wget -c -O glove/glove.840B.300d.zip https://nlp.stanford.edu/data/glove.840B.300d.zip
-python tools/prepare_glove.py        # 自动解压 + 转成 Gensim 原生格式 + 自检
+python tools/prepare_glove.py       # 解压、转 Gensim 原生格式、自检
 ```
 
-`tools/prepare_glove.py` 做三件事：
+不能直接用 `KeyedVectors.load_word2vec_format(txt, no_header=True)`。840B 这份里有些
+词本身带空格，Gensim 按空格切分后要求恰好 301 段，会抛 `ValueError`。脚本自己解析：
+右边 300 个数当向量，剩下整段当词，2,196,017 行 0 异常。
 
-1. 解压 zip（5.3 GB 的 txt）；
-2. 转成 Gensim 原生 `.kv` 格式。**不能直接用
-   `KeyedVectors.load_word2vec_format(txt, no_header=True)`**——840B 这一份里有若干
-   「词」本身包含空格，Gensim 按空格切分后要求恰好 301 段，会直接抛 `ValueError`。
-   脚本自己解析：从右边取 300 个数当向量，剩下的整段当词（实测 2,196,017 行 0 异常）；
-3. 自检：取向量、找相似词、算相似度、向量算术。
+自检里有个数字值得留意：`good ~ bad = 0.7355`。反义词的余弦相似度很高，因为 GloVe 学的是
+分布相似，`good` 和 `bad` 出现在几乎相同的上下文里。所有静态词向量都有这个特点，
+也是情感分类不能只看词向量余弦的原因。
 
-```text
-词表大小 2,196,017，维度 300
-movie      → movies(0.880), film(0.791), films(0.752), flick(0.719)
-awful      → horrible(0.919), terrible(0.915), horrid(0.870), dreadful(0.831)
-good ~ great = 0.8417    good ~ bad = 0.7355    movie ~ banana = 0.1742
-king - man + woman → queen(0.775), prince(0.612), princess(0.602)
-```
-
-> `good ~ bad = 0.7355` 这个数字值得停一下：**反义词的余弦相似度很高**。
-> 因为 GloVe 学的是「分布相似」——`good` 和 `bad` 出现在几乎相同的上下文里
-> （`the movie was ___`）。这是所有静态词向量的固有特点，
-> 也是情感分类不能只靠词向量余弦的原因。
-
-三种表示方法的区别见 [`docs/glove-word2vec-bow.md`](docs/glove-word2vec-bow.md)。
-
-## 仓库结构
-
-结构上分四类：**根目录是运行入口**，`kaggle_tutorial/` 是阶段一，
-中间四个目录是你要手动放数据的地方，剩下的是支撑代码与文档。
-
-```text
-GYT-NLP-developing/
-│
-├─ ① 运行入口（阶段二，直接 python xxx.py 跑）
-│   ├── imdb_process.py                 数据预处理 → pickle
-│   ├── imdb_bow_baseline.py            传统分类器基线（BoW / TF-IDF）
-│   ├── imdb_cnn.py                     ┐
-│   ├── imdb_lstm.py                    │
-│   ├── imdb_gru.py                     ├ GloVe + 神经网络（任务 7-11）
-│   ├── imdb_cnnlstm.py                 │
-│   ├── imdb_attention_lstm.py          │
-│   ├── imdb_transformer.py             │
-│   ├── imdb_capsule_lstm.py            ┘
-│   ├── imdb_bert_trainer.py            ┐
-│   ├── imdb_distilbert_trainer.py      ├ 预训练模型微调（任务 11）
-│   ├── imdb_roberta_trainer.py         ┘
-│   ├── common.py                       ★ 所有模型共用的训练框架
-│   └── hf_trainer.py                   ★ BERT 系微调的共用实现
-│
-├─ ② 需要你手动放东西的目录（全部 .gitignore）
-│   ├── corpus/imdb/                    ← IMDB 数据
-│   │   ├── labeledTrainData.tsv          25,000 条带标签
-│   │   ├── testData.tsv                  25,000 条待预测
-│   │   ├── unlabeledTrainData.tsv        50,000 条无标签
-│   │   └── sampleSubmission.csv          官方提交样例
-│   ├── glove/                          ← GloVe 词向量
-│   │   ├── glove.840B.300d.zip           下载的原始压缩包（2.1 GB）
-│   │   ├── glove.840B.300d.txt           解压产物（5.3 GB，转换完可删）
-│   │   ├── glove.840B.300d.kv            Gensim 原生格式
-│   │   └── glove.840B.300d.kv.vectors.npy
-│   ├── pickle/imdb_glove.pickle3       预处理产物（312 MB，自动生成）
-│   └── models/                         最佳模型权重（1.5 GB，自动生成）
-│
-├─ ③ 产出（results/ 入库，logs/ 也入库）
-│   ├── results/
-│   │   ├── comparison.md                 统一对比表 + 四项结论
-│   │   ├── test_scores.csv               官方测试集的准确率与 AUC
-│   │   ├── <model>_summary.json          准确率、参数量、训练时间
-│   │   ├── <model>_history.csv           逐 epoch 的 loss 与 accuracy
-│   │   ├── <model>_submission.csv        Kaggle 提交文件（官方 id + 概率）
-│   │   └── attention_lstm_attention.json 注意力权重
-│   └── logs/<model>.log                  13 份训练日志
-│
-└─ ④ 支撑代码与文档
-    ├── kaggle_tutorial/                阶段一：Kaggle 教程的 Python 3 复现
-    │   ├── imdb.py                       数据加载与文本清洗（Part 1-4 共用）
-    │   └── part1~part4_*.py              BoW / Word2Vec / 文档向量 / TF-IDF
-    ├── notebooks/                      阶段一：可直接导入 Kaggle 的 Notebook
-    ├── tools/
-    │   ├── check_imdb_data.py            数据体检（任务 3）
-    │   ├── prepare_glove.py              GloVe 转换 + 自检（任务 4）
-    │   ├── score_test.py                 测试集打分 + 生成提交文件
-    │   ├── collect_results.py            汇总 → 对比表（任务 12）
-    │   ├── make_local_dataset.py         从 aclImdb 重建竞赛格式数据
-    │   └── build_notebooks.py
-    ├── tests/                          pytest 37 项（不需要 GPU，2.8 秒）
-    │   ├── test_imdb.py                  阶段一的清洗逻辑
-    │   └── test_models.py                12 个模型的前向与语义不变量
-    └── docs/
-        ├── troubleshooting.md            遇到的问题及解决办法（24 条）
-        ├── learning-summary.md           学习总结
-        ├── glove-word2vec-bow.md         三种文本表示方法的区别
-        ├── results.md                    阶段一完整实测数据
-        ├── from-bow-to-llm.md            概念脉络：One-Hot → BoW → Word2Vec → LLM
-        ├── kaggle-gpu.md                 Kaggle 免费算力笔记
-        └── original_code/                压缩包里的原始脚本（未修改，用于对照）
-            └── unlisted/                 不在任务清单里的 3 个脚本
-```
-
-**为什么模型脚本放在根目录而不是收进子包**：任务清单要求的运行命令就是
-`python imdb_cnn.py`。收进 `models/` 之类的子目录会让命令变成
-`python models/imdb_cnn.py`，和清单不一致。所以根目录只放**运行入口**，
-其余一律进子目录。
-
-## 完整运行顺序
+## 运行
 
 ```bash
-# ── 0. 环境 ───────────────────────────────────────────────
-pip install -r requirements.txt
+python experiments/preprocess.py                 # 产出 pickle/imdb_glove.pickle3
+python experiments/baseline.py                   # BoW 与 TF-IDF
 
-# ── 1. 数据（见上文「数据集与 GloVe 下载」）────────────────
-python tools/check_imdb_data.py              # 确认三份 TSV 没问题
+python experiments/glove/cnn.py
+python experiments/glove/lstm.py
+python experiments/glove/gru.py
+python experiments/glove/cnnlstm.py
+python experiments/glove/attention_lstm.py       # --show-attention 导出注意力权重
+python experiments/glove/transformer.py
+python experiments/glove/capsule_lstm.py
 
-# ── 2. GloVe ─────────────────────────────────────────────
-python tools/prepare_glove.py                # 解压 + 转换 + 自检（约 6 分钟）
+python experiments/finetune/distilbert.py        # 三个里最快，先跑这个
+python experiments/finetune/bert.py
+python experiments/finetune/roberta.py
 
-# ── 3. 预处理 ────────────────────────────────────────────
-python imdb_process.py                       # → pickle/imdb_glove.pickle3（约 1 分钟）
+python experiments/peft/lora.py --probe-steps 20 # 先探显存，几十秒
+python experiments/peft/lora.py                  # 约 55 分钟
+python experiments/peft/adalora.py --lr 5e-4
+python experiments/peft/ptuning.py
+python experiments/peft/prefix.py --epochs 6 --lr 3e-4
 
-# ── 4. 传统基线 ───────────────────────────────────────────
-python imdb_bow_baseline.py                  # BoW+RF 与 TF-IDF+LR
-
-# ── 5. 神经网络（按任务清单顺序）───────────────────────────
-python imdb_cnn.py                           # 任务 7
-python imdb_lstm.py                          # 任务 8
-python imdb_gru.py                           # 任务 9
-python imdb_cnnlstm.py                       # 任务 10-A
-python imdb_attention_lstm.py                # 任务 10-B（输出注意力权重）
-
-# ── 6. 选做 ──────────────────────────────────────────────
-python imdb_transformer.py
-python imdb_capsule_lstm.py
-python imdb_distilbert_trainer.py            # 三个 BERT 系里最快，建议先跑这个
-python imdb_bert_trainer.py
-python imdb_roberta_trainer.py
-
-# ── 7. 汇总 ──────────────────────────────────────────────
-python tools/score_test.py --model all       # 测试集打分 + 生成提交文件
-python tools/collect_results.py              # → results/comparison.md，并同步进 README
-python -m pytest tests/ -q                   # 37 项测试
+python tools/score_submissions.py --model all    # 打分，写 results/test_scores.csv
+python tools/collect_results.py                  # 汇总对比表并同步 README
+python -m pytest tests/ -q
 ```
 
-在 Tesla T4 上跑完全部 12 个模型约 **75 分钟**（不含 GloVe 下载与转换的约 25 分钟）。
+前 12 个模型在 T4 上合计约 75 分钟（不含 GloVe 下载转换的 25 分钟），
+参数高效微调那四个合计约 3 小时。
 
-每个模型脚本跑完会产出五样东西：
+每个脚本跑完留下 `logs/<name>.log`、`results/<name>_history.csv`、
+`results/<name>_summary.json`、`results/<name>_submission.csv`，
+以及权重（GloVe 系是 `models/<name>_best.pt`，PEFT 是 `models/<name>_peft/` 里的 adapter）。
 
-| 产物 | 位置 |
+显存不够就调小 `--batch-size`，梯度累积步数会自动补到等效 32，和其他模型保持同一口径。
+上限由 `core/mem_guard.py` 硬限在 13.5 GB，越线主动中止，被中止的运行不写结果，
+不会混进对比表。
+
+对一条新评论做预测：
+
+```bash
+python experiments/glove/cnn.py --predict "This film was a masterpiece from start to finish."
+python experiments/finetune/roberta.py --predict "Boring, predictable and far too long."
+```
+
+## 踩过的坑
+
+完整 34 条在 [docs/troubleshooting.md](docs/troubleshooting.md)。最值得记的是
+「不报错但结果是错的」这一类，占了一半以上。
+
+| 现象 | 原因 |
 |---|---|
-| 训练日志（每 epoch 的 train/val loss 与 accuracy） | `logs/<name>.log` |
-| 逐 epoch 指标 CSV | `results/<name>_history.csv` |
-| 汇总 JSON（准确率、参数量、训练时间） | `results/<name>_summary.json` |
-| 最佳模型权重（按验证准确率） | `models/<name>_best.pt` |
-| Kaggle 提交文件（官方 id + 正面概率） | `results/<name>_submission.csv` |
+| 提交文件格式全对，分数等于随机 | `group_by_length=True` 也作用于 `predict`，概率按长度重排后与 id 逐行错位 |
+| 重载 adapter 后 AUC 0.31，反相关 | DeBERTa 的 pooler 是随机初始化的，peft 只保存 classifier，重载时又换了一个随机 pooler |
+| AdaLoRA 准确率 0.5094 | 默认挂载点比 LoRA 宽 6 倍；`update_and_allocate()` 要每步手动调；学习率得比 LoRA 高 5 倍 |
+| 填到 512 后 `states[-1]` 取到的全是 PAD | 句尾信息被三百多个 PAD 冲掉，要用 `pack_padded_sequence` |
+| CNN-LSTM 在无序集合上做顺序建模 | `permute([1,0,2])` 把卷积核维度当成了时间步 |
+| Attention 权重随 batch_size 变化 | `softmax(dim=1)` 归一化到了 batch 维，应该沿时间轴 |
+| Transformer 的词表退化成 26 个字母 | 分词函数返回字符串而不是词列表，`Vocab.build` 逐字符建表 |
+| 验证准确率虚低且每次不同 | 少了 `model.eval()`，验证时 Dropout 还在丢神经元 |
+| 显存单调增长直到 OOM | `train_loss += loss` 累加的是带计算图的张量 |
+| 官方文件和 aclImdb 只有 53% 命中 | 官方把正文引号转义成 `\"`，还原后是 99.9% |
 
-## 每个模型的运行命令
+这些都有回归测试钉住。评测口径另外三点：OOV 率按词型算 22.23%、按词次算 0.43%，
+报数必须说清口径；`read_csv` 要显式 `quoting=csv.QUOTE_NONE`，影评里全是引号，
+按默认规则解析会行数正常但内容错位；划分必须固定 `random_state` 并分层，否则跨模型不可比。
 
-所有 GloVe 模型共用同一套命令行参数（`common.build_parser`）：
-`--epochs` `--batch-size` `--lr` `--seed` `--clip` `--predict` `--no-submission`。
+## 文档
 
-| 模型 | 命令 | 要点 |
-|---|---|---|
-| 传统基线 | `python imdb_bow_baseline.py` | `--only bow_rf` 只跑其中一个 |
-| **CNN** | `python imdb_cnn.py` | 多尺度卷积 `--filter-sizes 3 4 5` |
-| **LSTM** | `python imdb_lstm.py` | `--num-hiddens 120 --num-layers 2`；`--unidirectional` 做单向对照 |
-| **GRU** | `python imdb_gru.py` | 与 LSTM 脚本结构、超参、种子完全一致，只换 `nn.GRU` |
-| **CNN-LSTM** | `python imdb_cnnlstm.py` | `--pooling-size 2` 把序列压到 256 |
-| **Attention-LSTM** | `python imdb_attention_lstm.py` | `--show-attention 6 --top-words 12` 导出注意力权重 |
-| Transformer | `python imdb_transformer.py` | `--num-heads 6 --num-layers 2`，`lr` 默认 3e-4 |
-| Capsule-LSTM | `python imdb_capsule_lstm.py` | `--num-capsule 8 --dim-capsule 16 --routings 3` |
-| DistilBERT | `python imdb_distilbert_trainer.py` | 6 层，最快 |
-| BERT | `python imdb_bert_trainer.py` | `--batch-size 16 --lr 2e-5` |
-| RoBERTa | `python imdb_roberta_trainer.py` | `--lr 1e-5`（更大会塌） |
-
-### 对一条新评论做预测
-
-任何模型训练完之后，都可以用 `--predict` 载入最佳权重直接预测，不重新训练：
-
-```bash
-python imdb_cnn.py --predict "This film was a masterpiece from start to finish."
-python imdb_gru.py --predict "Terrible pacing." "Absolutely loved every minute."
-python imdb_distilbert_trainer.py --predict "A quietly devastating film."
-```
-
-```text
-INFO [positive p=0.9987] This film was a masterpiece from start to finish.
-```
-
-### Attention 权重：模型在看哪些词
-
-`imdb_attention_lstm.py` 训练结束会把注意力权重写进
-`results/attention_lstm_attention.json`，并在日志里打印高权重词：
-
-```text
-[positive p=0.9962] This movie was absolutely wonderful. The acting was superb ...
-  高权重词: wonderful(0.1667), absolutely(0.1497), superb(0.1296), acting(0.0916)
-
-[negative p=0.0013] A complete waste of time. Terrible script, wooden acting ...
-  高权重词: waste(0.1243), terrible(0.1172), of(0.1035), time(0.1016), wooden(0.0582)
-```
-
-模型确实把权重压在情感词上（`wonderful` / `superb` / `waste` / `terrible` / `wooden`），
-而不是均匀分给 500 个位置——这就是早期 Attention 相对「最终隐藏状态」的价值：
-**既缓解了信息瓶颈，又顺带给出了可解释性**。
-
-## 遇到的问题及解决办法
-
-完整的 24 条记录在 **[`docs/troubleshooting.md`](docs/troubleshooting.md)**，
-这里列最关键的几类：
-
-**跑不起来的（直接报错）**
-
-| 问题 | 解决 |
-|---|---|
-| `imdb_process.py` 写死 `g:\lib\glove.840B.300d.gensim.txt` | 改相对路径 `glove/` |
-| `pickle/`、`result/` 目录不存在，跑到最后一行才崩 | `common.setup()` 提前创建 |
-| `imdb_cnn.py` 读 `imdb_demo_glove.pickle3`，实际产出是 `imdb_glove.pickle3` | 统一文件名 |
-| `device = torch.device('cuda:0')` + `.cuda()` 写死 | `common.get_device()` 自动选择 |
-| Gensim 读不了原始 `glove.840B.300d.txt`（有含空格的词） | 自己解析：右边 300 个数当向量 |
-| `datasets.load_metric` / `evaluation_strategy` / `Trainer(tokenizer=)` 已移除或改名 | 见 troubleshooting 第三节 |
-
-**跑得通但训不出来的（最难发现）**
-
-| 问题 | 后果 | 解决 |
-|---|---|---|
-| 序列填到 512，`states[-1]` 读的全是 PAD | 句尾信息被三百多个 PAD 冲掉 | `pack_padded_sequence` |
-| CNN-LSTM `permute([1,0,2])` 把**卷积核维度当成时间步** | LSTM 在无序集合上做顺序建模，组合模型失去意义 | 改成 `(batch, seq', num_filter)` |
-| Attention `softmax(dim=1)` 归一化到 **batch 维** | batch_size 一改结果就变；且加权后没求和，算完就被丢掉 | 沿时间轴归一化 + `bmm` 加权求和 |
-| Capsule 的 `squash` 写成纯 L2 归一化 | 所有胶囊长度都变成 1，「置信度」信息被抹平 | `‖s‖²/(1+‖s‖²)·s/‖s‖` |
-| Transformer 的 `review_to_wordlist` 返回字符串 | `Vocab.build` **逐字符**建词表，词表退化成 26 个字母 | 重写该脚本 |
-| `train_loss += loss` 累加带计算图的张量 | 显存单调增长直到 OOM | `loss.item() * batch_size` |
-| 没有 `model.eval()` | 验证时 Dropout 仍在丢神经元，准确率被低估且每次不同 | `common._run_epoch` 自动切换 |
-| 用最后一个 epoch 的权重预测 | 实测 CNN 第 5 epoch 最好（0.8876），第 10 已掉到 0.8850 | 按 `val_acc` 保存最佳权重 |
-
-这几条都有对应的回归测试钉住（`tests/test_models.py`，37 项）：
-
-```bash
-python -m pytest tests/ -v
-```
-
-**评测口径**
-
-- OOV 率按**词型**算是 22.23%，按**词次**算只有 0.43%——报 OOV 必须说清口径；
-- 三个 BERT 脚本原本 `train_test_split` 连 `random_state` 都没有，每次划分都不同，
-  跨模型完全不可比。现在全项目统一 `random_state=42, stratify=y`；
-- `read_csv` 必须显式 `quoting=csv.QUOTE_NONE`：影评里全是英文引号，
-  按默认规则解析会**行数正常但内容错位**；
-- 比对官方文件和 aclImdb 时必须先还原转义的 `\"`，否则命中率只有 53%，
-  会误判成两批不同的数据（实际是 99.9% 相同）。
-
-## 关于 Kaggle 免费 GPU
-
-阶段一（BoW / TF-IDF / Word2Vec）**全程不需要 GPU**，开了也一秒不省——
-主要计算是字符串哈希、稀疏计数和决策树分裂，不是稠密矩阵乘法。
-
-阶段二就完全不同了。同样的数据在 Tesla T4 上：CNN 一个 epoch 约 10 秒，
-双向 LSTM 约 29 秒，Transformer 约 70 秒；换到 CPU 会慢 20~50 倍。
-**这是 GPU 真正开始起作用的分界线。**
-
-Kaggle 的免费额度（GPU 每周 30 小时、TPU 20 小时，需先完成手机验证）、
-开启步骤和省额度技巧，整理在 [`docs/kaggle-gpu.md`](docs/kaggle-gpu.md)。
-
-## 延伸阅读
-
-- 📊 **[实验结果对比表](results/comparison.md)** —— 自动生成，12 个模型的准确率 / 时间 / 参数量
-- 🎯 **[测试集分数](results/test_scores.csv)** —— 官方 `testData.tsv` 上的准确率与 ROC-AUC
-- 🔤 **[GloVe、Word2Vec 与 Bag of Words 的区别](docs/glove-word2vec-bow.md)** ——
-  局部 vs 全局训练目标，以及为什么自训 Word2Vec 打不过词频统计
-- 🛠 **[遇到的问题及解决办法](docs/troubleshooting.md)** —— 24 条，含「不报错但训不出来」的一整类
-- 🎓 **[学习总结](docs/learning-summary.md)** —— 从这个项目里真正学到的东西
-- 📖 **[从 Bag of Words 到大模型 Embedding](docs/from-bow-to-llm.md)** ——
-  One-Hot 为什么不够用、静态向量的三个局限、ELMo 的分水岭意义
-- 📈 **[阶段一完整实测结果](docs/results.md)** —— K-Means 聚类抽查、为什么语义簇计数好于向量平均
-- ⚡ **[Kaggle 算力笔记](docs/kaggle-gpu.md)**
+- [docs/peft-lora.md](docs/peft-lora.md) — LoRA 原理、显存账、四种方法对比、踩坑
+- [docs/troubleshooting.md](docs/troubleshooting.md) — 34 条问题与解决
+- [docs/from-bow-to-llm.md](docs/from-bow-to-llm.md) — One-Hot 到上下文词向量的脉络
+- [docs/glove-word2vec-bow.md](docs/glove-word2vec-bow.md) — 三种文本表示的区别
+- [docs/learning-summary.md](docs/learning-summary.md) — 学习总结
+- [docs/results.md](docs/results.md) — Kaggle 教程复现的完整实测
+- [docs/kaggle-gpu.md](docs/kaggle-gpu.md) — Kaggle 免费算力
+- [results/comparison.md](results/comparison.md) — 自动生成的对比表
 
 ## 参考
 
-- [Kaggle · Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/competitions/word2vec-nlp-tutorial)
-- Maas et al., 2011. [Learning Word Vectors for Sentiment Analysis](https://aclanthology.org/P11-1015/) —— IMDB 数据集原论文
-- Mikolov et al., 2013. [Efficient Estimation of Word Representations in Vector Space](https://arxiv.org/abs/1301.3781) —— Word2Vec
-- Pennington et al., 2014. [GloVe: Global Vectors for Word Representation](https://aclanthology.org/D14-1162/)
-- Kim, 2014. [Convolutional Neural Networks for Sentence Classification](https://aclanthology.org/D14-1181/) —— TextCNN
-- Yang et al., 2016. [Hierarchical Attention Networks for Document Classification](https://aclanthology.org/N16-1174/) —— 本项目 Attention 的打分函数
-- Vaswani et al., 2017. [Attention Is All You Need](https://arxiv.org/abs/1706.03762)
-- Devlin et al., 2019. [BERT: Pre-training of Deep Bidirectional Transformers](https://aclanthology.org/N19-1423/)
-- Sanh et al., 2019. [DistilBERT](https://arxiv.org/abs/1910.01108) · Liu et al., 2019. [RoBERTa](https://arxiv.org/abs/1907.11692)
-- Sabour et al., 2017. [Dynamic Routing Between Capsules](https://arxiv.org/abs/1710.09829)
-
----
-
-<div align="center">
-<sub>数据集遵循 Stanford AI Lab 使用条款 · 本仓库代码用于学习目的</sub>
-</div>
+- Kaggle: [Bag of Words Meets Bags of Popcorn](https://www.kaggle.com/competitions/word2vec-nlp-tutorial)
+- Maas et al., *Learning Word Vectors for Sentiment Analysis*, ACL 2011
+- Pennington et al., *GloVe: Global Vectors for Word Representation*, EMNLP 2014
+- Hu et al., *LoRA: Low-Rank Adaptation of Large Language Models*, 2021
+- Zhang et al., *AdaLoRA: Adaptive Budget Allocation for PEFT*, 2023
+- Li & Liang, *Prefix-Tuning: Optimizing Continuous Prompts for Generation*, 2021
+- Liu et al., *GPT Understands, Too*, 2021
+- Chen et al., *Training Deep Nets with Sublinear Memory Cost*, 2016

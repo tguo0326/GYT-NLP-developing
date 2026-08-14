@@ -1,0 +1,97 @@
+2026-08-14 14:42:55,319 INFO model=deberta_prefix device=cuda seed=42
+2026-08-14 14:42:55,345 INFO gpu: Tesla T4
+2026-08-14 14:42:55,512 INFO 显存上限 13.5 GB / 14.6 GB（fraction=0.927）
+2026-08-14 14:42:55,512 INFO Prefix-Tuning on roberta-base：batch=32 × accum=1（等效 32）, max_length=384, lr=0.0003, epochs=6.0, checkpointing=True, fp16=True
+2026-08-14 14:42:56,591 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-14 14:43:09,247 INFO [mem] base_loaded    显存峰值 0.00 GB  主机内存 1.36 GB
+2026-08-14 14:43:09,247 WARNING Prefix-Tuning 不支持 gradient checkpointing（peft 限制），本次自动关闭——显存峰值会明显高于其他三种方法
+2026-08-14 14:43:09,257 INFO 参数量: 总计 125,607,940, 可训练 960,770（0.765%）
+2026-08-14 14:43:09,257 INFO [mem] peft_wrapped   显存峰值 0.00 GB  主机内存 1.36 GB
+2026-08-14 14:43:14,854 INFO [mem] train_begin    显存峰值 0.47 GB  主机内存 1.36 GB
+2026-08-14 15:01:12,348 INFO [mem] train_end      显存峰值 3.96 GB  主机内存 1.92 GB
+2026-08-14 15:01:12,348 INFO [mem] after_train    显存峰值 3.96 GB  主机内存 1.92 GB
+2026-08-14 15:01:12,348 INFO 验证准确率 0.8980，训练 1082.9s，显存峰值 3.96 GB
+2026-08-14 15:01:12,904 INFO 已保存 adapter 到 /home/ubuntu/科研专用/NLP/models/deberta_prefix_peft（8.3 MB）
+2026-08-14 15:01:12,904 INFO step 50     epoch 0.08  train_loss 0.6936  lr 6.53e-05
+2026-08-14 15:01:12,904 INFO step 100    epoch 0.16  train_loss 0.6672  lr 1.32e-04
+2026-08-14 15:01:12,904 INFO step 150    epoch 0.24  train_loss 0.6164  lr 1.99e-04
+2026-08-14 15:01:12,904 INFO step 200    epoch 0.32  train_loss 0.5590  lr 2.65e-04
+2026-08-14 15:01:12,904 INFO step 250    epoch 0.40  train_loss 0.5300  lr 2.98e-04
+2026-08-14 15:01:12,904 INFO step 300    epoch 0.48  train_loss 0.4589  lr 2.94e-04
+2026-08-14 15:01:12,905 INFO step 350    epoch 0.56  train_loss 0.4384  lr 2.90e-04
+2026-08-14 15:01:12,905 INFO step 400    epoch 0.64  train_loss 0.3996  lr 2.85e-04
+2026-08-14 15:01:12,905 INFO step 450    epoch 0.72  train_loss 0.3858  lr 2.81e-04
+2026-08-14 15:01:12,905 INFO step 500    epoch 0.80  train_loss 0.3857  lr 2.77e-04
+2026-08-14 15:01:12,905 INFO step 550    epoch 0.88  train_loss 0.3985  lr 2.73e-04
+2026-08-14 15:01:12,905 INFO step 600    epoch 0.96  train_loss 0.3774  lr 2.68e-04
+2026-08-14 15:01:12,905 INFO epoch 1.00  val_loss 0.3187  val_acc 0.8682  17.1s
+2026-08-14 15:01:12,905 INFO step 650    epoch 1.04  train_loss 0.3817  lr 2.64e-04
+2026-08-14 15:01:12,905 INFO step 700    epoch 1.12  train_loss 0.3678  lr 2.60e-04
+2026-08-14 15:01:12,905 INFO step 750    epoch 1.20  train_loss 0.3402  lr 2.55e-04
+2026-08-14 15:01:12,905 INFO step 800    epoch 1.28  train_loss 0.3418  lr 2.51e-04
+2026-08-14 15:01:12,905 INFO step 850    epoch 1.36  train_loss 0.3534  lr 2.47e-04
+2026-08-14 15:01:12,905 INFO step 900    epoch 1.44  train_loss 0.3545  lr 2.43e-04
+2026-08-14 15:01:12,905 INFO step 950    epoch 1.52  train_loss 0.3217  lr 2.39e-04
+2026-08-14 15:01:12,905 INFO step 1000   epoch 1.60  train_loss 0.3339  lr 2.34e-04
+2026-08-14 15:01:12,905 INFO step 1050   epoch 1.68  train_loss 0.3089  lr 2.30e-04
+2026-08-14 15:01:12,905 INFO step 1100   epoch 1.76  train_loss 0.3264  lr 2.26e-04
+2026-08-14 15:01:12,905 INFO step 1150   epoch 1.84  train_loss 0.3013  lr 2.22e-04
+2026-08-14 15:01:12,905 INFO step 1200   epoch 1.92  train_loss 0.3356  lr 2.17e-04
+2026-08-14 15:01:12,905 INFO step 1250   epoch 2.00  train_loss 0.3198  lr 2.13e-04
+2026-08-14 15:01:12,905 INFO epoch 2.00  val_loss 0.2852  val_acc 0.8830  17.1s
+2026-08-14 15:01:12,905 INFO step 1300   epoch 2.08  train_loss 0.3149  lr 2.09e-04
+2026-08-14 15:01:12,905 INFO step 1350   epoch 2.16  train_loss 0.3220  lr 2.05e-04
+2026-08-14 15:01:12,905 INFO step 1400   epoch 2.24  train_loss 0.3440  lr 2.00e-04
+2026-08-14 15:01:12,905 INFO step 1450   epoch 2.32  train_loss 0.2960  lr 1.96e-04
+2026-08-14 15:01:12,905 INFO step 1500   epoch 2.40  train_loss 0.2874  lr 1.92e-04
+2026-08-14 15:01:12,905 INFO step 1550   epoch 2.48  train_loss 0.3028  lr 1.88e-04
+2026-08-14 15:01:12,905 INFO step 1600   epoch 2.56  train_loss 0.2957  lr 1.83e-04
+2026-08-14 15:01:12,906 INFO step 1650   epoch 2.64  train_loss 0.2868  lr 1.79e-04
+2026-08-14 15:01:12,906 INFO step 1700   epoch 2.72  train_loss 0.2751  lr 1.75e-04
+2026-08-14 15:01:12,906 INFO step 1750   epoch 2.80  train_loss 0.3031  lr 1.71e-04
+2026-08-14 15:01:12,906 INFO step 1800   epoch 2.88  train_loss 0.2916  lr 1.66e-04
+2026-08-14 15:01:12,906 INFO step 1850   epoch 2.96  train_loss 0.3082  lr 1.62e-04
+2026-08-14 15:01:12,906 INFO epoch 3.00  val_loss 0.2700  val_acc 0.8920  17.1s
+2026-08-14 15:01:12,906 INFO step 1900   epoch 3.04  train_loss 0.2978  lr 1.58e-04
+2026-08-14 15:01:12,906 INFO step 1950   epoch 3.12  train_loss 0.2863  lr 1.54e-04
+2026-08-14 15:01:12,906 INFO step 2000   epoch 3.20  train_loss 0.2599  lr 1.49e-04
+2026-08-14 15:01:12,906 INFO step 2050   epoch 3.28  train_loss 0.2698  lr 1.45e-04
+2026-08-14 15:01:12,906 INFO step 2100   epoch 3.36  train_loss 0.2846  lr 1.41e-04
+2026-08-14 15:01:12,906 INFO step 2150   epoch 3.44  train_loss 0.2908  lr 1.37e-04
+2026-08-14 15:01:12,906 INFO step 2200   epoch 3.52  train_loss 0.2677  lr 1.32e-04
+2026-08-14 15:01:12,906 INFO step 2250   epoch 3.60  train_loss 0.2848  lr 1.28e-04
+2026-08-14 15:01:12,906 INFO step 2300   epoch 3.68  train_loss 0.2831  lr 1.24e-04
+2026-08-14 15:01:12,906 INFO step 2350   epoch 3.76  train_loss 0.2923  lr 1.19e-04
+2026-08-14 15:01:12,906 INFO step 2400   epoch 3.84  train_loss 0.2864  lr 1.15e-04
+2026-08-14 15:01:12,906 INFO step 2450   epoch 3.92  train_loss 0.3062  lr 1.11e-04
+2026-08-14 15:01:12,906 INFO step 2500   epoch 4.00  train_loss 0.2573  lr 1.07e-04
+2026-08-14 15:01:12,906 INFO epoch 4.00  val_loss 0.2599  val_acc 0.8962  17.1s
+2026-08-14 15:01:12,906 INFO step 2550   epoch 4.08  train_loss 0.2809  lr 1.02e-04
+2026-08-14 15:01:12,906 INFO step 2600   epoch 4.16  train_loss 0.2888  lr 9.82e-05
+2026-08-14 15:01:12,906 INFO step 2650   epoch 4.24  train_loss 0.2714  lr 9.40e-05
+2026-08-14 15:01:12,906 INFO step 2700   epoch 4.32  train_loss 0.2839  lr 8.97e-05
+2026-08-14 15:01:12,906 INFO step 2750   epoch 4.40  train_loss 0.2567  lr 8.54e-05
+2026-08-14 15:01:12,906 INFO step 2800   epoch 4.48  train_loss 0.2827  lr 8.12e-05
+2026-08-14 15:01:12,906 INFO step 2850   epoch 4.56  train_loss 0.2542  lr 7.69e-05
+2026-08-14 15:01:12,906 INFO step 2900   epoch 4.64  train_loss 0.2612  lr 7.27e-05
+2026-08-14 15:01:12,906 INFO step 2950   epoch 4.72  train_loss 0.2865  lr 6.84e-05
+2026-08-14 15:01:12,906 INFO step 3000   epoch 4.80  train_loss 0.2491  lr 6.42e-05
+2026-08-14 15:01:12,907 INFO step 3050   epoch 4.88  train_loss 0.2740  lr 5.99e-05
+2026-08-14 15:01:12,907 INFO step 3100   epoch 4.96  train_loss 0.2748  lr 5.57e-05
+2026-08-14 15:01:12,907 INFO epoch 5.00  val_loss 0.2555  val_acc 0.8982  17.1s
+2026-08-14 15:01:12,907 INFO step 3150   epoch 5.04  train_loss 0.3036  lr 5.14e-05
+2026-08-14 15:01:12,907 INFO step 3200   epoch 5.12  train_loss 0.2744  lr 4.71e-05
+2026-08-14 15:01:12,907 INFO step 3250   epoch 5.20  train_loss 0.2818  lr 4.29e-05
+2026-08-14 15:01:12,907 INFO step 3300   epoch 5.28  train_loss 0.2532  lr 3.86e-05
+2026-08-14 15:01:12,907 INFO step 3350   epoch 5.36  train_loss 0.2506  lr 3.44e-05
+2026-08-14 15:01:12,907 INFO step 3400   epoch 5.44  train_loss 0.2689  lr 3.01e-05
+2026-08-14 15:01:12,907 INFO step 3450   epoch 5.52  train_loss 0.2832  lr 2.59e-05
+2026-08-14 15:01:12,907 INFO step 3500   epoch 5.60  train_loss 0.2791  lr 2.16e-05
+2026-08-14 15:01:12,907 INFO step 3550   epoch 5.68  train_loss 0.2686  lr 1.74e-05
+2026-08-14 15:01:12,907 INFO step 3600   epoch 5.76  train_loss 0.2737  lr 1.31e-05
+2026-08-14 15:01:12,907 INFO step 3650   epoch 5.84  train_loss 0.2551  lr 8.85e-06
+2026-08-14 15:01:12,907 INFO step 3700   epoch 5.92  train_loss 0.2719  lr 4.60e-06
+2026-08-14 15:01:12,907 INFO step 3750   epoch 6.00  train_loss 0.2449  lr 3.40e-07
+2026-08-14 15:01:12,907 INFO epoch 6.00  val_loss 0.2529  val_acc 0.8980  17.1s
+2026-08-14 15:03:23,072 INFO 已写出 deberta_prefix_submission.csv（25000 行）
+2026-08-14 15:03:23,073 INFO 已写出 deberta_prefix_summary.json

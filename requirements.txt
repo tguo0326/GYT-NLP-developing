@@ -20,6 +20,15 @@ transformers>=4.40
 datasets>=2.18
 accelerate>=0.30
 
+# === 阶段三：参数高效微调（LoRA / AdaLoRA / P-Tuning / Prefix-Tuning）===
+# peft 0.15 起 AdaLoraConfig 必须传 total_step，代码按新版写；
+# 更早的版本会因为多了这个参数而报 TypeError。
+peft>=0.15
+# DeBERTa 的 tokenizer 是 SentencePiece 的，没有它 from_pretrained 直接失败
+sentencepiece>=0.2
+# mem_guard 用它读进程常驻内存——CUDA 的 OOM 能捕获，主机内存被吃光只能自己盯
+psutil>=5.9
+
 # === 可视化与 Notebook ===
 matplotlib>=3.8
 jupyterlab>=4.0

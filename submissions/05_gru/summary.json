@@ -1,0 +1,14 @@
+{
+  "model": "gru",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.8936,
+  "best_epoch": 7,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30391742,
+  "trainable_params": 565442,
+  "train_seconds": 283.0,
+  "seconds_per_epoch": 28.3,
+  "device": "cuda",
+  "checkpoint": "models/gru_best.pt"
+}

@@ -1,0 +1,23 @@
+{
+  "model": "deberta_ptuning",
+  "method": "P-Tuning",
+  "text_representation": "microsoft/deberta-v3-large + P-Tuning（冻结底座）",
+  "best_val_acc": 0.9458,
+  "best_epoch": 2,
+  "epochs": 2,
+  "batch_size": 32,
+  "grad_accum": 1,
+  "effective_batch": 32,
+  "max_length": 384,
+  "learning_rate": 0.0001,
+  "gradient_checkpointing": true,
+  "total_params": 435366148,
+  "trainable_params": 302338,
+  "trainable_pct": 0.0694,
+  "adapter_mb": 10.7,
+  "peak_gpu_gb": 4.93,
+  "train_seconds": 3250.0,
+  "seconds_per_epoch": 1625.0,
+  "device": "cuda",
+  "checkpoint": "models/deberta_ptuning_peft"
+}

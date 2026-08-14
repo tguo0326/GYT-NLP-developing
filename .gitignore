@@ -27,7 +27,6 @@ logs/
 *.pth
 *.bin
 *.ckpt
-submissions/
 *.csv
 
 # results/ 是要入库的：对比表、逐 epoch 指标、Kaggle 提交文件都很小，
@@ -38,6 +37,12 @@ submissions/
 !results/*.md
 results/**/*.pt
 results/**/*.pth
+
+# submissions/ 是给 Kaggle 交的成品，每个方法一个子目录，都很小，入库
+!submissions/
+!submissions/**/*.csv
+!submissions/**/*.json
+!submissions/**/*.md
 
 # Python
 __pycache__/

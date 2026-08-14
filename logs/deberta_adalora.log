@@ -1,0 +1,42 @@
+2026-08-14 13:32:00,462 INFO model=deberta_adalora device=cuda seed=42
+2026-08-14 13:32:00,486 INFO gpu: Tesla T4
+2026-08-14 13:32:00,644 INFO 显存上限 13.5 GB / 14.6 GB（fraction=0.927）
+2026-08-14 13:32:00,644 INFO AdaLoRA on microsoft/deberta-v3-large：batch=32 × accum=1（等效 32）, max_length=384, lr=0.0005, epochs=2, checkpointing=True, fp16=True
+2026-08-14 13:32:02,454 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-14 13:32:17,611 INFO [mem] base_loaded    显存峰值 0.00 GB  主机内存 3.18 GB
+2026-08-14 13:32:17,715 INFO 参数量: 总计 439,262,772, 可训练 4,198,914（0.956%）
+2026-08-14 13:32:17,715 INFO [mem] peft_wrapped   显存峰值 0.00 GB  主机内存 3.18 GB
+2026-08-14 13:32:25,844 INFO [mem] train_begin    显存峰值 1.65 GB  主机内存 2.69 GB
+2026-08-14 14:28:08,283 INFO [mem] train_end      显存峰值 4.87 GB  主机内存 2.92 GB
+2026-08-14 14:28:08,284 INFO [mem] after_train    显存峰值 4.87 GB  主机内存 2.92 GB
+2026-08-14 14:28:08,284 INFO 验证准确率 0.9504，训练 3350.1s，显存峰值 4.87 GB
+2026-08-14 14:28:08,876 INFO 已保存 adapter 到 /home/ubuntu/科研专用/NLP/models/deberta_adalora_peft（20.7 MB）
+2026-08-14 14:28:08,876 INFO step 50     epoch 0.08  train_loss 2.1337  lr 3.27e-04
+2026-08-14 14:28:08,876 INFO step 100    epoch 0.16  train_loss 0.8765  lr 4.90e-04
+2026-08-14 14:28:08,876 INFO step 150    epoch 0.24  train_loss 0.7204  lr 4.69e-04
+2026-08-14 14:28:08,876 INFO step 200    epoch 0.32  train_loss 0.7119  lr 4.47e-04
+2026-08-14 14:28:08,876 INFO step 250    epoch 0.40  train_loss 0.7322  lr 4.26e-04
+2026-08-14 14:28:08,876 INFO step 300    epoch 0.48  train_loss 0.6779  lr 4.05e-04
+2026-08-14 14:28:08,876 INFO step 350    epoch 0.56  train_loss 0.4043  lr 3.85e-04
+2026-08-14 14:28:08,876 INFO step 400    epoch 0.64  train_loss 0.3255  lr 3.63e-04
+2026-08-14 14:28:08,876 INFO step 450    epoch 0.72  train_loss 0.2077  lr 3.42e-04
+2026-08-14 14:28:08,876 INFO step 500    epoch 0.80  train_loss 0.2107  lr 3.21e-04
+2026-08-14 14:28:08,876 INFO step 550    epoch 0.88  train_loss 0.2270  lr 3.00e-04
+2026-08-14 14:28:08,876 INFO step 600    epoch 0.96  train_loss 0.1926  lr 2.78e-04
+2026-08-14 14:28:08,876 INFO epoch 1.00  val_loss 0.1710  val_acc 0.9446  110.4s
+2026-08-14 14:28:08,876 INFO step 650    epoch 1.04  train_loss 0.1764  lr 2.57e-04
+2026-08-14 14:28:08,877 INFO step 700    epoch 1.12  train_loss 0.1675  lr 2.36e-04
+2026-08-14 14:28:08,877 INFO step 750    epoch 1.20  train_loss 0.1511  lr 2.14e-04
+2026-08-14 14:28:08,877 INFO step 800    epoch 1.28  train_loss 0.1521  lr 1.93e-04
+2026-08-14 14:28:08,877 INFO step 850    epoch 1.36  train_loss 0.1417  lr 1.72e-04
+2026-08-14 14:28:08,877 INFO step 900    epoch 1.44  train_loss 0.1269  lr 1.51e-04
+2026-08-14 14:28:08,877 INFO step 950    epoch 1.52  train_loss 0.1330  lr 1.29e-04
+2026-08-14 14:28:08,877 INFO step 1000   epoch 1.60  train_loss 0.1526  lr 1.08e-04
+2026-08-14 14:28:08,877 INFO step 1050   epoch 1.68  train_loss 0.1146  lr 8.68e-05
+2026-08-14 14:28:08,877 INFO step 1100   epoch 1.76  train_loss 0.1359  lr 6.55e-05
+2026-08-14 14:28:08,877 INFO step 1150   epoch 1.84  train_loss 0.1460  lr 4.43e-05
+2026-08-14 14:28:08,877 INFO step 1200   epoch 1.92  train_loss 0.1293  lr 2.30e-05
+2026-08-14 14:28:08,877 INFO step 1250   epoch 2.00  train_loss 0.1295  lr 1.70e-06
+2026-08-14 14:28:08,877 INFO epoch 2.00  val_loss 0.1416  val_acc 0.9504  110.1s
+2026-08-14 14:42:49,337 INFO 已写出 deberta_adalora_submission.csv（25000 行）
+2026-08-14 14:42:49,338 INFO 已写出 deberta_adalora_summary.json

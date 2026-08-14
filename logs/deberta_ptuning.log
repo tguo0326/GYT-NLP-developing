@@ -1,0 +1,42 @@
+2026-08-14 12:22:06,475 INFO model=deberta_ptuning device=cuda seed=42
+2026-08-14 12:22:06,499 INFO gpu: Tesla T4
+2026-08-14 12:22:06,655 INFO 显存上限 13.5 GB / 14.6 GB（fraction=0.927）
+2026-08-14 12:22:06,655 INFO P-Tuning on microsoft/deberta-v3-large：batch=32 × accum=1（等效 32）, max_length=384, lr=0.0001, epochs=2, checkpointing=True, fp16=True
+2026-08-14 12:22:08,426 INFO 划分：训练 20000 条 / 验证 5000 条
+2026-08-14 12:22:23,379 INFO [mem] base_loaded    显存峰值 0.00 GB  主机内存 3.08 GB
+2026-08-14 12:22:23,391 INFO 参数量: 总计 435,366,148, 可训练 302,338（0.069%）
+2026-08-14 12:22:23,391 INFO [mem] peft_wrapped   显存峰值 0.00 GB  主机内存 3.08 GB
+2026-08-14 12:22:31,700 INFO [mem] train_begin    显存峰值 1.62 GB  主机内存 2.59 GB
+2026-08-14 13:16:33,882 INFO [mem] train_end      显存峰值 4.93 GB  主机内存 2.71 GB
+2026-08-14 13:16:33,883 INFO [mem] after_train    显存峰值 4.93 GB  主机内存 2.71 GB
+2026-08-14 13:16:33,883 INFO 验证准确率 0.9458，训练 3250.0s，显存峰值 4.93 GB
+2026-08-14 13:16:34,418 INFO 已保存 adapter 到 /home/ubuntu/科研专用/NLP/models/deberta_ptuning_peft（10.7 MB）
+2026-08-14 13:16:34,418 INFO step 50     epoch 0.08  train_loss 0.7037  lr 6.53e-05
+2026-08-14 13:16:34,418 INFO step 100    epoch 0.16  train_loss 0.6992  lr 9.80e-05
+2026-08-14 13:16:34,418 INFO step 150    epoch 0.24  train_loss 0.6719  lr 9.37e-05
+2026-08-14 13:16:34,418 INFO step 200    epoch 0.32  train_loss 0.6248  lr 8.94e-05
+2026-08-14 13:16:34,418 INFO step 250    epoch 0.40  train_loss 0.5088  lr 8.52e-05
+2026-08-14 13:16:34,419 INFO step 300    epoch 0.48  train_loss 0.4263  lr 8.09e-05
+2026-08-14 13:16:34,419 INFO step 350    epoch 0.56  train_loss 0.3240  lr 7.69e-05
+2026-08-14 13:16:34,419 INFO step 400    epoch 0.64  train_loss 0.2973  lr 7.28e-05
+2026-08-14 13:16:34,419 INFO step 450    epoch 0.72  train_loss 0.2420  lr 6.85e-05
+2026-08-14 13:16:34,419 INFO step 500    epoch 0.80  train_loss 0.2387  lr 6.43e-05
+2026-08-14 13:16:34,419 INFO step 550    epoch 0.88  train_loss 0.2133  lr 6.00e-05
+2026-08-14 13:16:34,419 INFO step 600    epoch 0.96  train_loss 0.2053  lr 5.57e-05
+2026-08-14 13:16:34,419 INFO epoch 1.00  val_loss 0.1674  val_acc 0.9418  112.5s
+2026-08-14 13:16:34,419 INFO step 650    epoch 1.04  train_loss 0.1838  lr 5.15e-05
+2026-08-14 13:16:34,419 INFO step 700    epoch 1.12  train_loss 0.1831  lr 4.72e-05
+2026-08-14 13:16:34,419 INFO step 750    epoch 1.20  train_loss 0.1724  lr 4.30e-05
+2026-08-14 13:16:34,419 INFO step 800    epoch 1.28  train_loss 0.1588  lr 3.87e-05
+2026-08-14 13:16:34,419 INFO step 850    epoch 1.36  train_loss 0.1576  lr 3.45e-05
+2026-08-14 13:16:34,419 INFO step 900    epoch 1.44  train_loss 0.1580  lr 3.02e-05
+2026-08-14 13:16:34,419 INFO step 950    epoch 1.52  train_loss 0.1676  lr 2.60e-05
+2026-08-14 13:16:34,419 INFO step 1000   epoch 1.60  train_loss 0.1621  lr 2.17e-05
+2026-08-14 13:16:34,419 INFO step 1050   epoch 1.68  train_loss 0.1386  lr 1.74e-05
+2026-08-14 13:16:34,419 INFO step 1100   epoch 1.76  train_loss 0.1509  lr 1.32e-05
+2026-08-14 13:16:34,419 INFO step 1150   epoch 1.84  train_loss 0.1701  lr 8.94e-06
+2026-08-14 13:16:34,419 INFO step 1200   epoch 1.92  train_loss 0.1560  lr 4.68e-06
+2026-08-14 13:16:34,419 INFO step 1250   epoch 2.00  train_loss 0.1456  lr 4.26e-07
+2026-08-14 13:16:34,419 INFO epoch 2.00  val_loss 0.1657  val_acc 0.9458  111.9s
+2026-08-14 13:31:54,531 INFO 已写出 deberta_ptuning_submission.csv（25000 行）
+2026-08-14 13:31:54,531 INFO 已写出 deberta_ptuning_summary.json

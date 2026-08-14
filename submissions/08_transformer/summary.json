@@ -1,0 +1,14 @@
+{
+  "model": "transformer",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.876,
+  "best_epoch": 4,
+  "epochs": 10,
+  "batch_size": 32,
+  "total_params": 31168326,
+  "trainable_params": 1342026,
+  "train_seconds": 701.0,
+  "seconds_per_epoch": 70.1,
+  "device": "cuda",
+  "checkpoint": "models/transformer_best.pt"
+}

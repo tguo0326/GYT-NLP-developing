@@ -11,6 +11,8 @@
 
     python tools/score_test.py --model roberta
     python tools/score_test.py --model all
+
+阶段三的 PEFT 模型请用 tools/score_submissions.py，原因见 docs/peft-lora.md。
 """
 
 from __future__ import annotations
@@ -29,19 +31,30 @@ from sklearn.metrics import accuracy_score, roc_auc_score
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-import common  # noqa: E402
+from core import common  # noqa: E402
 
 # GloVe 系模型：脚本模块名 → 权重文件名（common.train 存的是 models/<name>_best.pt）
 GLOVE_MODELS = {
-    "cnn": "imdb_cnn",
-    "lstm": "imdb_lstm",
-    "gru": "imdb_gru",
-    "cnnlstm": "imdb_cnnlstm",
-    "attention_lstm": "imdb_attention_lstm",
-    "transformer": "imdb_transformer",
-    "capsule_lstm": "imdb_capsule_lstm",
+    "cnn": "experiments.glove.cnn",
+    "lstm": "experiments.glove.lstm",
+    "gru": "experiments.glove.gru",
+    "cnnlstm": "experiments.glove.cnnlstm",
+    "attention_lstm": "experiments.glove.attention_lstm",
+    "transformer": "experiments.glove.transformer",
+    "capsule_lstm": "experiments.glove.capsule_lstm",
 }
 HF_MODELS = ("distilbert", "bert", "roberta")
+
+# 阶段三 PEFT 模型：名字 → (底座 model_id, 训练时的 max_length)。
+# adapter 目录里只有几 MB 的增量权重，底座要单独从 Hub / 缓存加载再套上去——
+# 这正是 PEFT 的卖点，但也意味着这里必须记住当初用的是哪个底座。
+# Prefix-Tuning 的底座是 roberta-base 而非 DeBERTa，原因见 docs/peft-lora.md。
+PEFT_MODELS = {
+    "deberta_lora": ("microsoft/deberta-v3-large", 384),
+    "deberta_adalora": ("microsoft/deberta-v3-large", 384),
+    "deberta_ptuning": ("microsoft/deberta-v3-large", 384),
+    "deberta_prefix": ("roberta-base", 384),
+}
 
 
 _WHITESPACE = re.compile(r"\s+")
@@ -107,12 +120,12 @@ def glove_probabilities(name: str, bundle: common.Bundle, test: pd.DataFrame,
 
 def hf_probabilities(name: str, test: pd.DataFrame, device: torch.device,
                      batch_size: int = 64, max_length: int = 256) -> np.ndarray:
-    import hf_trainer  # noqa: F401  —— 顺带关掉 transformers 的 TF 探测
+    from core import hf_trainer  # noqa: F401  —— 顺带关掉 transformers 的 TF 探测
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
     checkpoint = common.MODELS_DIR / f"{name}_hf"
     if not checkpoint.exists():
-        raise FileNotFoundError(f"找不到 {checkpoint}，请先跑 python imdb_{name}_trainer.py")
+        raise FileNotFoundError(f"找不到 {checkpoint}，请先跑 python experiments/finetune/{name}.py")
 
     tokenizer = AutoTokenizer.from_pretrained(str(checkpoint))
     model = AutoModelForSequenceClassification.from_pretrained(str(checkpoint)).to(device).eval()
@@ -127,10 +140,58 @@ def hf_probabilities(name: str, test: pd.DataFrame, device: torch.device,
     return torch.cat(chunks).numpy()
 
 
+def peft_probabilities(name: str, test: pd.DataFrame, device: torch.device,
+                       batch_size: int = 32) -> np.ndarray:
+    """加载「冻结底座 + adapter」做推理。
+
+    和 `hf_probabilities` 的区别：那边 checkpoint 目录里是一份完整的模型；
+    这边目录里只有几 MB 的 adapter，底座得单独加载再套上去。
+
+    LoRA / AdaLoRA 这里其实可以 `merge_and_unload()` 把增量合并回底座，
+    推理就完全没有额外开销了。但 P-Tuning / Prefix 无法合并（它们改的是输入，
+    不是权重），为了四种方法走同一条代码路径，这里统一不合并——
+    差别只有几个百分点的推理耗时。
+    """
+    from core import peft_trainer  # noqa: F401  —— 顺带关掉 TF 探测、设好 alloc conf
+    from peft import PeftModel
+    from transformers import AutoModelForSequenceClassification, AutoTokenizer
+    from core import mem_guard
+
+    checkpoint = common.MODELS_DIR / f"{name}_peft"
+    if not checkpoint.exists():
+        raise FileNotFoundError(f"找不到 {checkpoint}，请先跑 python experiments/peft/{name.removeprefix("deberta_")}.py")
+
+    base_id, max_length = PEFT_MODELS[name]
+    mem_guard.cap_gpu()
+    tokenizer = AutoTokenizer.from_pretrained(str(checkpoint))
+    base = AutoModelForSequenceClassification.from_pretrained(base_id, num_labels=2)
+    model = PeftModel.from_pretrained(base, str(checkpoint)).to(device).eval()
+
+    texts = test["review"].astype(str).tolist()
+    chunks = []
+    # 用 fp16 自动混合精度推理，和训练时的口径一致。
+    # 走 fp32 的话在 T4 上慢 2~3 倍（这卡的 fp16 tensor core 是 fp32 的数倍算力）——
+    # 实测 25,000 条从约 9 分钟涨到约 30 分钟，四个模型就是两小时。
+    # softmax 前先 `.float()`，避免在 fp16 里做指数运算丢精度。
+    autocast = (torch.autocast("cuda", dtype=torch.float16)
+                if device.type == "cuda" else torch.autocast("cpu", enabled=False))
+    with torch.no_grad(), autocast:
+        for start in range(0, len(texts), batch_size):
+            batch = tokenizer(texts[start:start + batch_size], truncation=True,
+                              max_length=max_length, padding=True,
+                              return_tensors="pt").to(device)
+            logits = model(**batch).logits
+            chunks.append(torch.softmax(logits.float(), dim=1)[:, 1].cpu())
+    print(f"  底座 {base_id} + adapter，显存峰值 {mem_guard.gpu_peak_gb():.2f} GB")
+    return torch.cat(chunks).numpy()
+
+
 def score_one(name: str, bundle: common.Bundle | None, test: pd.DataFrame,
               truth: pd.Series | None, device: torch.device) -> dict:
     print(f"\n=== {name} ===")
-    if name in HF_MODELS:
+    if name in PEFT_MODELS:
+        probabilities = peft_probabilities(name, test, device)
+    elif name in HF_MODELS:
         probabilities = hf_probabilities(name, test, device)
     else:
         probabilities = glove_probabilities(name, bundle, test, device)
@@ -175,7 +236,7 @@ def write_submission(path: Path, ids: pd.Series, probabilities: np.ndarray) -> N
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="roberta",
-                        help="模型名，或 all（跑全部已训练的模型）")
+                        help="模型名，或 all（全部已训练的模型）/ peft（只跑阶段三的四种）")
     args = parser.parse_args()
 
     device = common.get_device()
@@ -183,11 +244,19 @@ def main() -> None:
     test, truth = load_test_frame()
     print(f"测试集 {len(test):,} 条" + ("，含真实标签" if truth is not None else "，无标签"))
 
-    names = (list(GLOVE_MODELS) + list(HF_MODELS)) if args.model == "all" else [args.model]
+    if args.model == "all":
+        names = list(GLOVE_MODELS) + list(HF_MODELS) + list(PEFT_MODELS)
+    elif args.model == "peft":
+        names = list(PEFT_MODELS)
+    else:
+        names = [args.model]
+
     rows = []
     for name in names:
+        # 只有 GloVe 系模型需要那份 pickle；transformer 系自己带 tokenizer
+        needs_bundle = name not in HF_MODELS and name not in PEFT_MODELS
         try:
-            rows.append(score_one(name, common.load_data() if name not in HF_MODELS else None,
+            rows.append(score_one(name, common.load_data() if needs_bundle else None,
                                   test, truth, device))
         except FileNotFoundError as error:
             print(f"\n=== {name} ===\n  跳过：{error}")

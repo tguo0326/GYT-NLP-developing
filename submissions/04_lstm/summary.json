@@ -1,0 +1,14 @@
+{
+  "model": "lstm",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.8894,
+  "best_epoch": 4,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30579902,
+  "trainable_params": 753602,
+  "train_seconds": 292.7,
+  "seconds_per_epoch": 29.3,
+  "device": "cuda",
+  "checkpoint": "models/lstm_best.pt"
+}

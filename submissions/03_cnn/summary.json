@@ -1,0 +1,14 @@
+{
+  "model": "cnn",
+  "text_representation": "GloVe 840B.300d",
+  "best_val_acc": 0.8876,
+  "best_epoch": 5,
+  "epochs": 10,
+  "batch_size": 64,
+  "total_params": 30288254,
+  "trainable_params": 461954,
+  "train_seconds": 97.9,
+  "seconds_per_epoch": 9.8,
+  "device": "cuda",
+  "checkpoint": "models/cnn_best.pt"
+}
