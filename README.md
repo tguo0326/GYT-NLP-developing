@@ -1,9 +1,45 @@
+<div align="center">
+
+<img src="https://readme-typing-svg.demolab.com?font=Fira%20Code&weight=600&size=26&duration=3200&pause=800&color=4C72B0&center=true&vCenter=true&width=820&lines=Bag%20of%20Words%20%E2%86%92%20GloVe%20%E2%86%92%20BERT%20%E2%86%92%20LoRA%3BIMDB%20%E6%83%85%E6%84%9F%E5%88%86%E7%B1%BB%20%C2%B7%2016%20%E7%A7%8D%E5%81%9A%E6%B3%95%E5%AE%8C%E6%95%B4%E5%AF%B9%E6%AF%94%3B0.84%20%E2%86%92%200.96%20%C2%B7%20%E5%8F%AA%E8%AE%AD%200.6%25%20%E7%9A%84%E5%8F%82%E6%95%B0" alt="Typing SVG" />
+
 # IMDB 情感分类：从词频统计到 LoRA
+
+**同一份数据、同一套口径，16 种做法从头跑到尾**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)](https://www.python.org/)
+[![PyTorch](https://img.shields.io/badge/PyTorch-2.8-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)](https://pytorch.org/)
+[![Transformers](https://img.shields.io/badge/Transformers-4.51-FFD21E?style=flat-square&logo=huggingface&logoColor=black)](https://huggingface.co/docs/transformers)
+[![PEFT](https://img.shields.io/badge/PEFT-0.20-9C6ADE?style=flat-square)](https://github.com/huggingface/peft)
+[![Kaggle](https://img.shields.io/badge/Kaggle-Notebook_Ready-20BEFF?style=flat-square&logo=kaggle&logoColor=white)](https://www.kaggle.com/competitions/word2vec-nlp-tutorial)
+
+[![Accuracy](https://img.shields.io/badge/测试集准确率-0.9633-2A9D8F?style=flat-square)](#结果)
+[![AUC](https://img.shields.io/badge/ROC--AUC-0.9924-2A9D8F?style=flat-square)](#结果)
+[![Trainable](https://img.shields.io/badge/可训练参数-0.60%25-457B9D?style=flat-square)](#参数高效微调)
+[![VRAM](https://img.shields.io/badge/显存峰值-4.8_GB_%2F_T4-457B9D?style=flat-square)](#参数高效微调)
+[![Tests](https://img.shields.io/badge/tests-65_passed-4C72B0?style=flat-square)](tests/)
+
+</div>
+
+---
 
 同一份 IMDB 影评数据（25,000 条标注 / 25,000 条测试），同一套划分和评测口径，
 跑通 16 种做法：词频统计 → 静态词向量 + 各种网络 → 预训练模型全量微调 → 参数高效微调。
 
 想回答的问题是：准确率是靠什么涨上去的，代价是多少参数和多少时间。
+
+```
+测试集准确率                                          可训练参数
+LoRA            ████████████████████████████  0.9633      263 万
+AdaLoRA         ███████████████████████████▏  0.9607      420 万
+P-Tuning        ██████████████████████████▎   0.9537       30 万
+RoBERTa 全量    ████████████████████▊         0.9369    1.25 亿
+BERT 全量       ██████████████████▏           0.9174    1.09 亿
+TF-IDF + LR     ████████████████▍             0.9055       20 万
+Attention-LSTM  ████████████████              0.9027       90 万
+TextCNN         █████████████▉                0.8858       46 万
+随机森林        ████████                      0.8419      5,000
+                └ 0.84                    0.97 ┘
+```
 
 ## 结果
 
