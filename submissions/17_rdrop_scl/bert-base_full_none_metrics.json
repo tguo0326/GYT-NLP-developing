@@ -1,0 +1,26 @@
+{
+  "args": {
+    "model_name": "bert-base-uncased",
+    "data_dir": "./corpus/imdb",
+    "max_length": 256,
+    "alpha": 0.0,
+    "temperature": 0.3,
+    "epochs": 2.0,
+    "batch_size": 16,
+    "grad_accum": 1,
+    "lr": 2e-05,
+    "seed": 3407,
+    "limit": null,
+    "output_dir": "./checkpoint/bert_base_none",
+    "submission": "./result/bert-base_full_none.csv"
+  },
+  "reg": "none",
+  "val_metrics": {
+    "eval_loss": 0.26440244913101196,
+    "eval_accuracy": 0.921,
+    "eval_runtime": 16.5219,
+    "eval_samples_per_second": 302.628,
+    "eval_steps_per_second": 9.503,
+    "epoch": 2.0
+  }
+}

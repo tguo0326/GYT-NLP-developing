@@ -1,0 +1,33 @@
+{
+  "args": {
+    "model_name": "answerdotai/ModernBERT-large",
+    "data_dir": "./corpus/imdb",
+    "max_length": 256,
+    "num_labels": 2,
+    "reg": "scl",
+    "rdrop_alpha": 1.0,
+    "scl_alpha": 0.2,
+    "scl_temperature": 0.3,
+    "lora_r": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "lora_target_modules": "auto",
+    "load_in_4bit": false,
+    "epochs": 2.0,
+    "batch_size": 16,
+    "grad_accum": 1,
+    "lr": 0.0002,
+    "seed": 3407,
+    "limit": null,
+    "output_dir": null,
+    "submission": null
+  },
+  "val_metrics": {
+    "eval_loss": 0.7629783153533936,
+    "eval_accuracy": 0.9472,
+    "eval_runtime": 73.717,
+    "eval_samples_per_second": 67.827,
+    "eval_steps_per_second": 2.13,
+    "epoch": 2.0
+  }
+}

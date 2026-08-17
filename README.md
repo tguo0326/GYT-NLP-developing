@@ -107,6 +107,36 @@ Prefix-Tuning 那行的底座是 RoBERTa-base 而不是 DeBERTa，所以不和�
 而全量微调它需要约 25 GB。没拿它做主实验是因为一个 epoch 要 1.9 小时。
 原理和实测数据见 [docs/peft-lora.md](docs/peft-lora.md)。
 
+### 正则化：R-Drop 与 SCL
+
+在上面那套 LoRA 之外再试两种改损失函数的正则：**R-Drop**（同一批输入过两次网络，
+用对称 KL 把两次的预测拉齐）和 **SCL**（在交叉熵之外加一项监督对比损失，
+让 batch 内同类的句向量靠近、异类的推远）。两条实现路线都写了：
+继承模型改 `forward`，和继承 `Trainer` 改 `compute_loss`。
+
+| 实验组 | baseline | +R-Drop | +SCL | +两者 |
+| --- | --: | --: | --: | --: |
+| ModernBERT-large + LoRA（unsloth 后端） | 0.9537 | 0.9540 | 0.9538 | 0.9541 |
+| ModernBERT-large + LoRA（peft 后端） | 0.9548 | 0.9546 | 0.9542 | — |
+| BERT-base 全量微调 | 0.9205 | **0.9241** | 0.9210 | — |
+
+**R-Drop 在全量微调上有效（+0.36 个点，验证集和测试集的排序一致），在 LoRA 上测不出来
+（+0.03 个点，噪声级）。** 我的理解是：R-Drop 和 SCL 本质都是抗过拟合的手段，
+而 LoRA 把可更新的自由度压到 0.4%，模型本来就没多少过拟合的余地，
+再叠一层正则没什么可省的；全量微调要更新 1.09 亿个参数，正则才有用武之地。
+单看任何一条线都得不出这个结论。
+
+SCL 两条线上都只有 0.0~0.06 个点，α 和 τ 一次都没调过，目前只能说"未观察到效果"。
+所有结果都是单 seed，0.1 个点这种量级要多 seed 才能定性。
+
+顺带把 unsloth 换上试了一遍：显存 2.7 GB → 1.7 GB（省 37%），但速度慢 32%。
+慢的原因是它的融合 kernel 只在 `lora_dropout=0` 时才走快速路径，
+而 **R-Drop 必须有 dropout 才有意义**，两个需求直接冲突。
+
+这三行的口径和上面主表不一样（底座、截断长度、等效 batch 都不同），只在组内比。
+而且这批交的是 0/1 硬标签不是概率，算不出 AUC，所以没进主表。
+原理笔记和踩坑记录写在 [experiments/reg/README.md](experiments/reg/README.md)。
+
 ## 提交文件
 
 `submissions/` 下每个方法一个子目录，各含 `submission.csv`、`summary.json` 和说明。
@@ -127,10 +157,11 @@ experiments/         运行入口
   glove/               七个 GloVe 神经网络
   finetune/            BERT / DistilBERT / RoBERTa
   peft/                lora / adalora / ptuning / prefix
+  reg/                 R-Drop / SCL，以及 unsloth 封装的 LoRA
 tools/               数据体检、GloVe 转换、打分、汇总
 tests/               pytest 65 项，不需要 GPU，约 6 秒
 docs/                原理笔记与踩坑记录
-submissions/         16 份 Kaggle 提交文件，按方法分目录
+submissions/         Kaggle 提交文件，按方法分目录
 results/             分数、逐 epoch 指标、对比表
 kaggle_tutorial/     Kaggle 入门教程的 Python 3 复现
 notebooks/           可直接导入 Kaggle 的 Notebook
@@ -227,6 +258,10 @@ python experiments/peft/adalora.py --lr 5e-4
 python experiments/peft/ptuning.py
 python experiments/peft/prefix.py --epochs 6 --lr 3e-4
 
+experiments/reg/run_route1.sh                    # R-Drop / SCL，BERT-base 全量微调，约 40 分钟
+experiments/reg/run_all.sh                       # R-Drop / SCL + LoRA，四组，约 4.5 小时
+python experiments/reg/score_local.py            # 给 submissions/17_rdrop_scl/ 打分
+
 python tools/score_submissions.py --model all    # 打分，写 results/test_scores.csv
 python tools/collect_results.py                  # 汇总对比表并同步 README
 python -m pytest tests/ -q
@@ -293,3 +328,6 @@ python experiments/finetune/roberta.py --predict "Boring, predictable and far to
 - Li & Liang, *Prefix-Tuning: Optimizing Continuous Prompts for Generation*, 2021
 - Liu et al., *GPT Understands, Too*, 2021
 - Chen et al., *Training Deep Nets with Sublinear Memory Cost*, 2016
+- Liang et al., *R-Drop: Regularized Dropout for Neural Networks*, NeurIPS 2021
+- Khosla et al., *Supervised Contrastive Learning*, NeurIPS 2020
+- Gunel et al., *Supervised Contrastive Learning for Pre-trained Language Model Fine-tuning*, ICLR 2021

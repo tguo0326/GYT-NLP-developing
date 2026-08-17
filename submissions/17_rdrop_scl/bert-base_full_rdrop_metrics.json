@@ -1,0 +1,25 @@
+{
+  "args": {
+    "model_name": "bert-base-uncased",
+    "data_dir": "./corpus/imdb",
+    "max_length": 256,
+    "alpha": 1.0,
+    "epochs": 2.0,
+    "batch_size": 16,
+    "grad_accum": 1,
+    "lr": 2e-05,
+    "seed": 3407,
+    "limit": null,
+    "output_dir": "./checkpoint/bert_base_rdrop",
+    "submission": "./result/bert-base_full_rdrop.csv"
+  },
+  "reg": "rdrop",
+  "val_metrics": {
+    "eval_loss": 0.243265300989151,
+    "eval_accuracy": 0.927,
+    "eval_runtime": 16.4181,
+    "eval_samples_per_second": 304.542,
+    "eval_steps_per_second": 9.563,
+    "epoch": 2.0
+  }
+}
