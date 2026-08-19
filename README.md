@@ -137,11 +137,66 @@ SCL 两条线上都只有 0.0~0.06 个点，α 和 τ 一次都没调过，目�
 而且这批交的是 0/1 硬标签不是概率，算不出 AUC，所以没进主表。
 原理笔记和踩坑记录写在 [experiments/reg/README.md](experiments/reg/README.md)。
 
+### 小 batch 下的监督对比：把 MoCo 搬过来
+
+上面那组 SCL 没测出效果，一个可能的解释是**正负样本不够**：对比损失只能从当前 batch 里
+凑同类样本，batch 小了就凑不出来。顺着这条思路把 MoCo（He et al., CVPR 2020）的两件东西
+搬进 DeBERTa-v3-large + LoRA：**历史特征队列**（把过去若干步的特征存下来当候选）和
+**动量编码器**（用 EMA 缓慢跟随的第二套参数产生这些特征，保证队列里的特征彼此一致）。
+四组对照都是真实 batch=4、梯度累积 8 步（等效批 32）、seed 42，
+其余超参与上面 LoRA 那次（0.9633）逐项一致，只差方法本身与动量系数。
+
+| 方法 | 测试集准确率 | ROC-AUC | 每 query 候选数 | 训练时间 | 显存峰值 |
+| --- | --: | --: | --: | --: | --: |
+| 纯交叉熵 | 0.9629 | 0.9924 | — | 66 min | 2.19 GB |
+| + 监督对比（双视图） | 0.9635 | 0.9918 | 4 | 127 min | 2.25 GB |
+| + 队列与动量编码器，m=0.999 | 0.9627 | 0.9914 | 4100 | 86 min | 2.22 GB |
+| + 队列与动量编码器，m=0.99 | 0.9633 | 0.9924 | 4100 | 86 min | 2.22 GB |
+
+**队列确实在工作，但准确率上分不出差别。** 每个 query 能看到的候选从 4 个涨到 4100 个
+（放大 1025 倍），22 项断言逐条验过队列指针与 FIFO 覆盖、动量参数的初始化一致性与
+EMA 更新幅度、checkpoint 往返恢复；可是四组极差只有 0.08 个百分点 —— 25,000 条里 20 条，
+小于单模型的二项标准误 0.124 个百分点，六个 McNemar p 值全部大于 0.27，
+四组预测概率之间的相关系数都在 0.99 以上。每组一个 seed，所以能说的是"看不出差别"，
+不是"证明没有差别"。
+
+三条值得记的：
+
+**动量系数要按训练步数折算，不能照搬论文。** 第一次直接用 MoCo 原文的 m=0.999，
+动量分支基本没在工作：同一句话过 query 和 key 两个编码器，特征余弦只有 0.515；
+对比损失从 8.28 缓慢降到 8.17 看着在收敛，但候选数 4100 时特征完全塌缩的损失恰好是
+log(4100)=8.32，也就是几乎没学 —— 只看损失的绝对值会被 log(N) 这个常数骗过去。
+算一下就清楚：m=0.999 的有效平均窗口是 1/(1−m)=1000 步，而这里总共只有 1250 步，
+训练结束时 key 里还残留 0.999^1250=28.6% 的初始权重；MoCo 原文训 20 万步以上，
+同样的窗口只占 0.5%。只把 m 改成 0.99，特征余弦从 0.515 升到 1.000、
+对比目标完成度从 21% 升到 79%，AUC 也从 0.9914 回到 0.9924。
+所以"对比项损害了概率排序"这个现象，根子在动量分支陈旧，不在对比学习本身。
+
+**小 batch 伤对比学习的途径是"凑不出配对正样本"，不是"正样本不够多"。**
+最早那版监督对比是单视图的（候选就是 batch 内另外 3 条），冒烟测试直接暴露出 batch=4 时
+约一半的 micro-batch 里会有 anchor 一个正样本都没有、被整条丢掉。堵住这个途径只需要让
+同一批输入多过一次网络、把两个 dropout 视图当成一对正样本，队列和动量编码器都用不上。
+队列解决的是另一个问题，这大概就是它在这里没有收益的主因。
+
+**真实 batch 从 32 降到 4 对纯交叉熵几乎没有影响。** 0.9629 对 0.9633，差 10 条样本。
+等效批不变的前提下"小 batch 有害"这个前提本身就很弱，也就难怪补救措施看不出效果。
+
+显存上有个细节：底座本来就是冻结的，所以动量编码器**不需要**复制第二份
+DeBERTa-v3-large，在同一个底座上再挂一套 LoRA adapter 就够，动量副本只有 380 万参数、
+约 14.5 MB，而复制整个底座是 4.35 亿参数、约 1.7 GB。
+
+还欠真实 batch=16 的三组（约 4 h）、每组补到 3 个 seed（约 10 h），以及 λ 扫描 ——
+候选数从 4 涨到 4100 会把对比损失的量级顶高约 8 倍，固定 λ=0.2 时两组的有效正则强度
+差很多，不扫 λ 分不清"队列有没有用"和"正则强度合不合适"。没跑的组表里就是空的，
+不填估计值。实现、断言与完整数据在 [experiments/moco/README.md](experiments/moco/README.md)
+和 [results/scl_moco_comparison.md](results/scl_moco_comparison.md)。
+
 ## 提交文件
 
 `submissions/` 下每个方法一个子目录，各含 `submission.csv`、`summary.json` 和说明。
 竞赛指标是 ROC-AUC，所以交的是正面情感概率而不是 0/1 标签，交硬标签会差 3~5 个点。
 最好的一份是 `submissions/16_lora/submission.csv`。
+`submissions/18_scl_moco/` 是小 batch 那批监督对比与 MoCo 的四份。
 
 ## 目录结构
 
@@ -158,6 +213,7 @@ experiments/         运行入口
   finetune/            BERT / DistilBERT / RoBERTa
   peft/                lora / adalora / ptuning / prefix
   reg/                 R-Drop / SCL，以及 unsloth 封装的 LoRA
+  moco/                监督对比 + MoCo 的队列与动量编码器
 tools/               数据体检、GloVe 转换、打分、汇总
 tests/               pytest 65 项，不需要 GPU，约 6 秒
 docs/                原理笔记与踩坑记录
@@ -262,6 +318,9 @@ experiments/reg/run_route1.sh                    # R-Drop / SCL，BERT-base 全�
 experiments/reg/run_all.sh                       # R-Drop / SCL + LoRA，四组，约 4.5 小时
 python experiments/reg/score_local.py            # 给 submissions/17_rdrop_scl/ 打分
 
+cd experiments/moco && python smoke_test.py      # 队列与动量编码器的 22 项断言，约 4 分钟
+cd experiments/moco && ./run_stage1.sh           # 监督对比 / MoCo 四组，真实 batch=4，约 5 小时
+
 python tools/score_submissions.py --model all    # 打分，写 results/test_scores.csv
 python tools/collect_results.py                  # 汇总对比表并同步 README
 python -m pytest tests/ -q
@@ -317,6 +376,8 @@ python experiments/finetune/roberta.py --predict "Boring, predictable and far to
 - [docs/results.md](docs/results.md) — Kaggle 教程复现的完整实测
 - [docs/kaggle-gpu.md](docs/kaggle-gpu.md) — Kaggle 免费算力
 - [results/comparison.md](results/comparison.md) — 自动生成的对比表
+- [experiments/moco/README.md](experiments/moco/README.md) — 队列与动量编码器的实现、22 项断言、结论
+- [results/scl_moco_comparison.md](results/scl_moco_comparison.md) — 小 batch 四组对照的完整指标与显著性检验
 
 ## 参考
 
@@ -330,4 +391,6 @@ python experiments/finetune/roberta.py --predict "Boring, predictable and far to
 - Chen et al., *Training Deep Nets with Sublinear Memory Cost*, 2016
 - Liang et al., *R-Drop: Regularized Dropout for Neural Networks*, NeurIPS 2021
 - Khosla et al., *Supervised Contrastive Learning*, NeurIPS 2020
+- He et al., *Momentum Contrast for Unsupervised Visual Representation Learning*, CVPR 2020
+- Wang et al., *Cross-Batch Memory for Embedding Learning*, CVPR 2020
 - Gunel et al., *Supervised Contrastive Learning for Pre-trained Language Model Fine-tuning*, ICLR 2021

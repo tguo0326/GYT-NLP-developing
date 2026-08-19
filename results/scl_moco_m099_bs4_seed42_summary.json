@@ -1,0 +1,101 @@
+{
+  "tag": "scl_moco_m099_bs4_seed42",
+  "method": "scl_moco",
+  "model_id": "microsoft/deberta-v3-large",
+  "config": {
+    "method": "scl_moco",
+    "model_id": "microsoft/deberta-v3-large",
+    "num_labels": 2,
+    "data_dir": "/home/ubuntu/科研专用/LoRA/new work 4/corpus/imdb",
+    "max_length": 384,
+    "batch_size": 4,
+    "grad_accum": 0,
+    "lr": 0.0001,
+    "epochs": 2,
+    "seed": 42,
+    "rank": 16,
+    "lora_alpha": 32,
+    "lora_dropout": 0.05,
+    "gradient_checkpointing": true,
+    "fp16": true,
+    "lam": 0.2,
+    "temperature": 0.3,
+    "proj_dim": 128,
+    "queue_size": 4096,
+    "momentum": 0.99,
+    "moco_include_self_key": true,
+    "log_stats_every": 50,
+    "subset": 0,
+    "probe_steps": 0,
+    "tag": "scl_moco_m099_bs4_seed42",
+    "out_dir": "/home/ubuntu/科研专用/LoRA/new work 4/result",
+    "log_dir": "/home/ubuntu/科研专用/LoRA/new work 4/logs",
+    "ckpt_dir": "/home/ubuntu/科研专用/LoRA/new work 4/checkpoint",
+    "grad_accum_resolved": 8,
+    "effective_batch": 32
+  },
+  "val_metrics_last_epoch": {
+    "eval_loss": 0.1335,
+    "eval_accuracy": 0.957,
+    "eval_macro_f1": 0.957,
+    "eval_macro_precision": 0.9571,
+    "eval_macro_recall": 0.957,
+    "eval_roc_auc": 0.9884,
+    "eval_runtime": 113.7872,
+    "eval_samples_per_second": 43.942,
+    "eval_steps_per_second": 5.493,
+    "epoch": 2.0
+  },
+  "val_best_epoch": 2.0,
+  "val_best_accuracy": 0.957,
+  "val_per_epoch": [
+    {
+      "epoch": 1.0,
+      "eval_loss": 0.147965669631958,
+      "eval_accuracy": 0.9534,
+      "eval_macro_f1": 0.9533965532090753,
+      "eval_roc_auc": 0.9874128799999999
+    },
+    {
+      "epoch": 2.0,
+      "eval_loss": 0.13345293700695038,
+      "eval_accuracy": 0.957,
+      "eval_macro_f1": 0.9569973837208255,
+      "eval_roc_auc": 0.9883868800000001
+    },
+    {
+      "epoch": 2.0,
+      "eval_loss": 0.1334610879421234,
+      "eval_accuracy": 0.957,
+      "eval_macro_f1": 0.9569973837208255,
+      "eval_roc_auc": 0.98838248
+    }
+  ],
+  "test_metrics": {
+    "accuracy": 0.9633,
+    "macro_f1": 0.9633,
+    "macro_precision": 0.9634,
+    "macro_recall": 0.9633,
+    "roc_auc": 0.9924,
+    "scored_rows": 24961
+  },
+  "train_seconds": 5130.8,
+  "peak_gpu_gb": 2.22,
+  "final_ce_loss": 0.10018120989669115,
+  "final_contrastive_loss": 7.826488704681396,
+  "final_total_loss": 1.6654789710044862,
+  "mean_pos_per_query": 2055.69,
+  "mean_neg_per_query": 2044.31,
+  "mean_candidates_per_query": 4100.0,
+  "final_query_key_cosine": 0.9998161792755127,
+  "final_contrast_progress": 0.7930810877022589,
+  "queue_valid_end": 4096,
+  "queue_label_counts_end": {
+    "0": 1977,
+    "1": 2119
+  },
+  "ema_calls": 1250,
+  "optimizer_steps": 1250,
+  "checkpoint": "models/scl_moco_m099_bs4_seed42（本地，未入库）",
+  "original_run_tag": "deberta_lora_scl_moco_m099_bs4_seed42"
+}

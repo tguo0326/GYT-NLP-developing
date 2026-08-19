@@ -1,0 +1,13 @@
+2026-08-19 05:12:02,034 INFO 命令：run_experiment.py --method baseline --batch_size 4 --seed 42
+2026-08-19 05:12:02,036 INFO method=baseline batch=4 × accum=8（effective 32）max_length=384 lr=0.0001 epochs=2 seed=42 λ=0.2 τ=0.3 queue=4096 m=0.999
+2026-08-19 05:12:04,807 INFO 参数量：总计 438,869,124，可训练 2,624,514（0.5980%）
+2026-08-19 05:12:06,121 INFO 划分：训练 20000 条 / 验证 5000 条 / 测试 25000 条
+2026-08-19 05:12:19,616 INFO SCLMoCoTrainer: method=baseline λ=0.2 τ=0.3 m=0.999 include_self_key=True
+2026-08-19 06:17:55,293 INFO 训练结束：3935.7s，显存峰值 2.19 GB（reserved 2.25 GB）
+2026-08-19 06:19:51,148 INFO 验证集：{'eval_loss': 0.13070374727249146, 'eval_accuracy': 0.956, 'eval_macro_f1': 0.9559999366399088, 'eval_macro_precision': 0.9560026265751291, 'eval_macro_recall': 0.956, 'eval_roc_auc': 0.98917968, 'eval_runtime': 113.9135, 'eval_samples_per_second': 43.893, 'eval_steps_per_second': 5.487, 'epoch': 2.0}
+2026-08-19 06:34:40,457 INFO 已写出 /home/ubuntu/科研专用/LoRA/new work 4/result/deberta_lora_baseline_bs4_seed42_submission.csv（25000 行，正面概率）
+2026-08-19 06:34:40,794 INFO id 与 testDataWithLabels.tsv 对不上，改按评论正文对齐
+2026-08-19 06:34:44,216 INFO 正文对齐 24961 / 25000 条
+2026-08-19 06:34:44,232 INFO 测试集（本地公开标签 24961 条）：{'accuracy': 0.9629, 'macro_f1': 0.9629, 'macro_precision': 0.9629, 'macro_recall': 0.9629, 'roc_auc': 0.9924, 'scored_rows': 24961}
+2026-08-19 06:34:44,796 INFO 已保存 MoCo 状态到 /home/ubuntu/科研专用/LoRA/new work 4/checkpoint/deberta_lora_baseline_bs4_seed42/moco_state.pt
+2026-08-19 06:34:44,796 INFO 已写出 /home/ubuntu/科研专用/LoRA/new work 4/result/deberta_lora_baseline_bs4_seed42_summary.json

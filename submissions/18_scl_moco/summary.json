@@ -1,0 +1,114 @@
+{
+  "group": "18_scl_moco",
+  "note": "真实 batch=4，effective batch 32，seed 42；其余超参与 16_lora（0.9633）一致",
+  "runs": {
+    "baseline": {
+      "method": "Baseline（纯 CE）",
+      "momentum": null,
+      "test": {
+        "accuracy": 0.9629,
+        "macro_f1": 0.9629,
+        "macro_precision": 0.9629,
+        "macro_recall": 0.9629,
+        "roc_auc": 0.9924,
+        "scored_rows": 24961
+      },
+      "val": {
+        "eval_loss": 0.1307,
+        "eval_accuracy": 0.956,
+        "eval_macro_f1": 0.956,
+        "eval_macro_precision": 0.956,
+        "eval_macro_recall": 0.956,
+        "eval_roc_auc": 0.9892,
+        "eval_runtime": 113.9135,
+        "eval_samples_per_second": 43.893,
+        "eval_steps_per_second": 5.487,
+        "epoch": 2.0
+      },
+      "train_seconds": 3935.7,
+      "peak_gpu_gb": 2.19,
+      "submission": "baseline_bs4_seed42_submission.csv"
+    },
+    "scl": {
+      "method": "SCL",
+      "momentum": null,
+      "test": {
+        "accuracy": 0.9635,
+        "macro_f1": 0.9635,
+        "macro_precision": 0.9636,
+        "macro_recall": 0.9635,
+        "roc_auc": 0.9918,
+        "scored_rows": 24961
+      },
+      "val": {
+        "eval_loss": 0.1337,
+        "eval_accuracy": 0.9566,
+        "eval_macro_f1": 0.9566,
+        "eval_macro_precision": 0.9568,
+        "eval_macro_recall": 0.9566,
+        "eval_roc_auc": 0.9874,
+        "eval_runtime": 113.9593,
+        "eval_samples_per_second": 43.875,
+        "eval_steps_per_second": 5.484,
+        "epoch": 2.0
+      },
+      "train_seconds": 7593.1,
+      "peak_gpu_gb": 2.25,
+      "submission": "scl_bs4_seed42_submission.csv"
+    },
+    "m0999": {
+      "method": "SCL-MoCo m=0.999",
+      "momentum": 0.999,
+      "test": {
+        "accuracy": 0.9627,
+        "macro_f1": 0.9627,
+        "macro_precision": 0.9628,
+        "macro_recall": 0.9627,
+        "roc_auc": 0.9914,
+        "scored_rows": 24961
+      },
+      "val": {
+        "eval_loss": 0.1376,
+        "eval_accuracy": 0.9556,
+        "eval_macro_f1": 0.9556,
+        "eval_macro_precision": 0.9556,
+        "eval_macro_recall": 0.9556,
+        "eval_roc_auc": 0.9873,
+        "eval_runtime": 114.2067,
+        "eval_samples_per_second": 43.78,
+        "eval_steps_per_second": 5.473,
+        "epoch": 2.0
+      },
+      "train_seconds": 5149.7,
+      "peak_gpu_gb": 2.22,
+      "submission": "m0999_bs4_seed42_submission.csv"
+    },
+    "m099": {
+      "method": "SCL-MoCo m=0.99",
+      "momentum": 0.99,
+      "test": {
+        "accuracy": 0.9633,
+        "macro_f1": 0.9633,
+        "macro_precision": 0.9634,
+        "macro_recall": 0.9633,
+        "roc_auc": 0.9924,
+        "scored_rows": 24961
+      },
+      "val": {
+        "eval_loss": 0.1335,
+        "eval_accuracy": 0.957,
+        "eval_macro_f1": 0.957,
+        "eval_macro_precision": 0.9571,
+        "eval_macro_recall": 0.957,
+        "eval_roc_auc": 0.9884,
+        "eval_runtime": 113.7872,
+        "eval_samples_per_second": 43.942,
+        "eval_steps_per_second": 5.493,
+        "epoch": 2.0
+      },
+      "train_seconds": 5130.8,
+      "peak_gpu_gb": 2.22,
+      "submission": "m099_bs4_seed42_submission.csv"
+    }
+  }
+}

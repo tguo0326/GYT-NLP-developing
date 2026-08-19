@@ -1,0 +1,227 @@
+/home/ubuntu/miniconda3/lib/python3.13/site-packages/transformers/convert_slow_tokenizer.py:559: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
+  warnings.warn(
+Some weights of DebertaV2ForSequenceClassification were not initialized from the model checkpoint at microsoft/deberta-v3-large and are newly initialized: ['classifier.bias', 'classifier.weight', 'pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2026-08-19 05:08:08,614 INFO 参数量：总计 443,855,238，可训练 3,805,314（0.8573%）
+2026-08-19 05:08:08,615 INFO 已在 DebertaV2Model 上挂 hidden-state hook
+2026-08-19 05:08:08,618 INFO 动量分支：104 组参数对，共 3,805,314 个参数（14.5 MB fp32）
+2026-08-19 05:08:09,970 WARNING subset=64：只是冒烟测试，结果不可汇报
+2026-08-19 05:08:09,971 INFO 划分：训练 64 条 / 验证 16 条 / 测试 64 条
+
+==============================================================================
+A. 单元检查：损失数学 / 队列机制（CPU，不依赖模型）
+==============================================================================
+✓ PASS  A1 supcon_core 与官方 SupConLoss 数值等价（普通 SCL 口径没被改动）
+        官方实现 = 2.90006351
+        本实现   = 2.90006351
+        差 = 0.00e+00；候选数/query = 15（=batch 16 去掉自己），平均正 7.12 负 7.88
+✓ PASS  A2 队列为空 / 无正样本时 loss 有限且为 0，不产生 NaN
+        空队列：loss=-0.0 有效候选=0 有正样本的 query=0/4
+        batch 内每类各 1 条（谁都没有正样本）：loss=-0.0 参与 loss 的 query=0/2
+✓ PASS  A3 队列指针推进 / 有效长度 / FIFO 覆盖最旧 / 标签保真 / 特征已归一化
+        queue_size=10，每步入队 4 条，(ptr, valid) 轨迹 = [(4, 4), (8, 8), (2, 10), (6, 10)]（第 3 步跨过队尾，绕回队头）
+        入队标签依次 = [[0, 0, 0, 0], [1, 1, 1, 1], [0, 0, 0, 0], [1, 1, 1, 1]]
+        槽位 2-3：标签 = [1, 1]；特征 == 最新一批(step3) 的前两条？True；还等于最旧那批(step0) 吗？False
+          → 最旧数据确实被覆盖，新数据确实写进去了
+        槽位 6-7（只写过一次）特征保持不变：True
+        队列内特征 L2 范数 min=1.000000 max=1.000000（应为 1）
+✓ PASS  A4 队列为空时：两组候选数、逐 query 正/负划分、乃至 loss 完全一致
+        标签 = [0, 0, 1, 0]（label=1 只有 1 条，单视图时它必然没有正样本）
+        SCL     ：候选 4，逐 query 正 (3, 3, 1, 3)，负 (1, 1, 3, 1)，loss 1.64112294
+        SCL-MoCo：候选 4，逐 query 正 (3, 3, 1, 3)，负 (1, 1, 3, 1)，loss 1.64112306
+        两组都有 4/4 个 query 参与 loss（没有任何 query 被 skip）
+        对照：老的单视图 SCL 在这批标签上 → 逐 query 正 (2, 2, 0, 2)（第 3 条 query 是 0，会被丢掉）
+✓ PASS  A5 队列填满后只有 SCL-MoCo 的候选扩大，SCL 仍然是 B 条
+        SCL     ：候选 4（与队列为空时相同 = 4），平均正 2.50，平均负 1.50
+        SCL-MoCo：候选 4100（4 条 key + 4096 条队列），平均正 2044.5，平均负 2055.5
+        → 放大倍数 1025×
+
+==============================================================================
+B. 端到端检查：microsoft/deberta-v3-large + LoRA + 动量分支 + 队列 + 真实 Trainer
+==============================================================================
+✓ PASS  B1 Query 与 Key 初始化参数完全一致（逐张量比较）
+        参数对 104 组，共 3,805,314 个参数
+        逐张量最大绝对差的最大值 = 0.000e+00（应为 0）
+        key 参数示例：['base_model.model.deberta.encoder.layer.0.attention.self.query_proj.lora_A.k_enc.weight', 'base_model.model.deberta.encoder.layer.0.attention.self.query_proj.lora_B.k_enc.weight', 'base_model.model.deberta.encoder.layer.0.attention.self.value_proj.lora_A.k_enc.weight']
+✓ PASS  B3 Key Encoder 全部 requires_grad=False
+        104 个 key 参数中 requires_grad=True 的有 0 个
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2671.13 examples/s]
+Map:   0%|          | 0/16 [00:00<?, ? examples/s]Map: 100%|██████████| 16/16 [00:00<00:00, 1596.12 examples/s]
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2852.93 examples/s]
+2026-08-19 05:08:10,123 INFO SCLMoCoTrainer: method=scl_moco λ=0.2 τ=0.3 m=0.999 include_self_key=True
+2026-08-19 05:08:10,959 INFO [scl_moco] micro=1 opt_step=0 ep=0.00 | CE 0.7314  contrast 1.3606  total 1.0036 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0690 | queue valid=0 ptr=4 {} | ema=0
+2026-08-19 05:08:11,373 INFO [scl_moco] micro=2 opt_step=0 ep=0.00 | CE 0.6616  contrast 2.0713  total 1.0759 | cand 8  pos 4.0  neg 4.0  skipped 0 | view_gap 0.0604 | queue valid=4 ptr=8 {0: 1, 1: 3} | ema=0
+2026-08-19 05:08:11,764 INFO [scl_moco] micro=3 opt_step=1 ep=0.12 | CE 0.6553  contrast 2.4819  total 1.1517 | cand 12  pos 7.0  neg 5.0  skipped 0 | view_gap 0.1620 | queue valid=8 ptr=12 {0: 3, 1: 5} | ema=1
+2026-08-19 05:08:12,104 INFO [scl_moco] micro=4 opt_step=1 ep=0.12 | CE 0.6950  contrast 2.7599  total 1.2470 | cand 16  pos 9.5  neg 6.5  skipped 0 | view_gap 0.1627 | queue valid=12 ptr=16 {0: 4, 1: 8} | ema=1
+2026-08-19 05:08:12,463 INFO [scl_moco] micro=5 opt_step=2 ep=0.25 | CE 0.7062  contrast 2.9788  total 1.3020 | cand 20  pos 10.0  neg 10.0  skipped 0 | view_gap 0.1729 | queue valid=16 ptr=20 {0: 5, 1: 11} | ema=2
+2026-08-19 05:08:12,805 INFO [scl_moco] micro=6 opt_step=2 ep=0.25 | CE 0.6484  contrast 3.1663  total 1.2817 | cand 24  pos 14.0  neg 10.0  skipped 0 | view_gap 0.1767 | queue valid=20 ptr=0 {0: 7, 1: 13} | ema=2
+2026-08-19 05:08:13,167 INFO [scl_moco] micro=7 opt_step=3 ep=0.38 | CE 0.7474  contrast 3.3281  total 1.4130 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2115 | queue valid=24 ptr=4 {0: 8, 1: 16} | ema=3
+2026-08-19 05:08:13,518 INFO [scl_moco] micro=8 opt_step=3 ep=0.38 | CE 0.7954  contrast 3.3276  total 1.4609 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2149 | queue valid=24 ptr=8 {0: 9, 1: 15} | ema=3
+2026-08-19 05:08:13,880 INFO [scl_moco] micro=9 opt_step=4 ep=0.50 | CE 0.7330  contrast 3.3302  total 1.3991 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2354 | queue valid=24 ptr=12 {0: 9, 1: 15} | ema=4
+2026-08-19 05:08:14,217 INFO [scl_moco] micro=10 opt_step=4 ep=0.50 | CE 0.4133  contrast 3.3369  total 1.0807 | cand 28  pos 18.0  neg 10.0  skipped 0 | view_gap 0.2517 | queue valid=24 ptr=16 {0: 10, 1: 14} | ema=4
+2026-08-19 05:08:14,575 INFO [scl_moco] micro=11 opt_step=5 ep=0.62 | CE 0.6626  contrast 3.3278  total 1.3281 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2592 | queue valid=24 ptr=20 {0: 9, 1: 15} | ema=5
+2026-08-19 05:08:14,914 INFO [scl_moco] micro=12 opt_step=5 ep=0.62 | CE 0.5925  contrast 3.3291  total 1.2583 | cand 28  pos 16.0  neg 12.0  skipped 0 | view_gap 0.2639 | queue valid=24 ptr=0 {0: 9, 1: 15} | ema=5
+2026-08-19 05:08:15,271 INFO [scl_moco] micro=13 opt_step=6 ep=0.75 | CE 0.5480  contrast 3.3288  total 1.2138 | cand 28  pos 16.0  neg 12.0  skipped 0 | view_gap 0.2785 | queue valid=24 ptr=4 {0: 9, 1: 15} | ema=6
+2026-08-19 05:08:15,610 INFO [scl_moco] micro=14 opt_step=6 ep=0.75 | CE 0.7548  contrast 3.3280  total 1.4204 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2695 | queue valid=24 ptr=8 {0: 8, 1: 16} | ema=6
+2026-08-19 05:08:15,968 INFO [scl_moco] micro=15 opt_step=7 ep=0.88 | CE 0.9358  contrast 3.3228  total 1.6003 | cand 28  pos 12.5  neg 15.5  skipped 0 | view_gap 0.2757 | queue valid=24 ptr=12 {0: 8, 1: 16} | ema=7
+2026-08-19 05:08:16,308 INFO [scl_moco] micro=16 opt_step=7 ep=0.88 | CE 0.5698  contrast 3.3303  total 1.2358 | cand 28  pos 16.0  neg 12.0  skipped 0 | view_gap 0.2567 | queue valid=24 ptr=16 {0: 9, 1: 15} | ema=7
+2026-08-19 05:08:16,549 INFO 已保存 MoCo 状态到 /tmp/tmpsur6ffdl/moco_state.pt
+2026-08-19 05:08:16,599 INFO 已从 /tmp/tmpsur6ffdl/moco_state.pt 恢复 MoCo 状态
+/home/ubuntu/miniconda3/lib/python3.13/site-packages/transformers/convert_slow_tokenizer.py:559: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
+  warnings.warn(
+Some weights of DebertaV2ForSequenceClassification were not initialized from the model checkpoint at microsoft/deberta-v3-large and are newly initialized: ['classifier.bias', 'classifier.weight', 'pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2026-08-19 05:08:19,054 INFO 参数量：总计 438,869,124，可训练 2,624,514（0.5980%）
+2026-08-19 05:08:20,186 WARNING subset=64：只是冒烟测试，结果不可汇报
+2026-08-19 05:08:20,186 INFO 划分：训练 64 条 / 验证 16 条 / 测试 64 条
+✓ PASS  B2 Key Encoder 不在 optimizer 中（Query 全在）
+        optimizer 参数 104 个
+        key 参数 104 个，落在 optimizer 里的 0 个（应为 0）
+        query 参数 104 个，落在 optimizer 里的 104 个（应全部命中）
+
+---- 开始 8 个 optimizer step 的真实训练（bs=4 × accum=2，queue_size=24）----
+{'loss': 1.0397, 'grad_norm': 3.405167818069458, 'learning_rate': 0.0001, 'epoch': 0.125}
+{'loss': 1.1993, 'grad_norm': 4.139100551605225, 'learning_rate': 8.75e-05, 'epoch': 0.25}
+{'loss': 1.2918, 'grad_norm': 1.5129550695419312, 'learning_rate': 7.500000000000001e-05, 'epoch': 0.375}
+{'loss': 1.437, 'grad_norm': 3.317347764968872, 'learning_rate': 6.25e-05, 'epoch': 0.5}
+{'loss': 1.2399, 'grad_norm': 2.3202006816864014, 'learning_rate': 5e-05, 'epoch': 0.625}
+{'loss': 1.2932, 'grad_norm': 1.7686172723770142, 'learning_rate': 3.7500000000000003e-05, 'epoch': 0.75}
+{'loss': 1.3171, 'grad_norm': 1.902711272239685, 'learning_rate': 2.5e-05, 'epoch': 0.875}
+{'loss': 1.4181, 'grad_norm': 3.8591251373291016, 'learning_rate': 1.25e-05, 'epoch': 1.0}
+{'train_runtime': 6.1152, 'train_samples_per_second': 10.466, 'train_steps_per_second': 1.308, 'train_loss': 1.2795110940933228, 'epoch': 1.0}
+---- 训练结束 ----
+
+✓ PASS  B4 optimizer 更新后 Query 参数正常变化
+        8 个 optimizer step 后 query 参数最大绝对变化 = 4.507e-04（应 > 0）
+✓ PASS  B5 Key 参数按 EMA 缓慢变化（既不是完全不变，也不是跟着一起跳）
+        step 1: |Δquery|=3.166e-08  |Δkey|=1.863e-09  比值=0.05882（应≈1-m=0.0010000000000000009）
+        step 2: |Δquery|=5.485e-05  |Δkey|=5.402e-08  比值=0.00098（应≈1-m=0.0010000000000000009）
+        step 3: |Δquery|=5.037e-05  |Δkey|=1.001e-07  比值=0.00199（应≈1-m=0.0010000000000000009）
+        step 4: |Δquery|=4.788e-05  |Δkey|=1.364e-07  比值=0.00285（应≈1-m=0.0010000000000000009）
+        step 5: |Δquery|=3.874e-05  |Δkey|=1.658e-07  比值=0.00428（应≈1-m=0.0010000000000000009）
+        step 6: |Δquery|=2.991e-05  |Δkey|=1.956e-07  比值=0.00654（应≈1-m=0.0010000000000000009）
+        step 7: |Δquery|=2.028e-05  |Δkey|=2.161e-07  比值=0.01066（应≈1-m=0.0010000000000000009）
+        step 8: |Δquery|=9.414e-06  |Δkey|=2.254e-07  比值=0.02394（应≈1-m=0.0010000000000000009）
+        θ_key ← m·θ_key+(1-m)·θ_query 的最大偏差 = 1.863e-09（应≈0）
+        key 最小变化 = 1.863e-09（应 > 0）
+✓ PASS  B6 EMA 次数 == optimizer step 数（不是 micro-batch 数）
+        optimizer step = 8，EMA 调用 = 8
+        micro-batch（= 入队次数）= 16，共入队 64 条特征
+✓ PASS  B7 队列填满并绕回，存的是归一化 embedding + 真实标签
+        queue_size=24，入队 16×4=64 条 → valid=24（满）ptr=16（=64 mod 24）
+        队列特征 L2 范数 min=1.00000 max=1.00000（应为 1）
+        队列标签分布 = {0: 10, 1: 14}（只能是真实标签 0/1，且总数=24）
+        特征维度 = (24, 128)（proj_dim=128，不是 2 类 logits）
+✓ PASS  B8 loss 不出现 NaN/Inf，且对比项确实非零（说明真的在起作用）
+        记录了 16 个 micro-batch
+        micro  1: CE 0.7314  contrast 1.3606  total 1.0036  cand 4  pos 2.5  neg 1.5  queue 0  ptr 4
+        micro  2: CE 0.6616  contrast 2.0713  total 1.0759  cand 8  pos 4.0  neg 4.0  queue 4  ptr 8
+        micro  3: CE 0.6553  contrast 2.4819  total 1.1517  cand 12  pos 7.0  neg 5.0  queue 8  ptr 12
+        micro  4: CE 0.6950  contrast 2.7599  total 1.2470  cand 16  pos 9.5  neg 6.5  queue 12  ptr 16
+        micro  5: CE 0.7062  contrast 2.9788  total 1.3020  cand 20  pos 10.0  neg 10.0  queue 16  ptr 20
+        micro  6: CE 0.6484  contrast 3.1663  total 1.2817  cand 24  pos 14.0  neg 10.0  queue 20  ptr 0
+        ... (完整记录见 result/*_steps.csv)
+✓ PASS  B9 队列真的把候选数抬起来了（bs=4：从 4 涨到 4+24）
+        第 1 个 micro-batch 候选数 = 4（队列还空，只有 4 条 key）
+        最后一个 micro-batch 候选数 = 28（4 条 key + 24 条队列）
+        同配置下普通 SCL 只有 3（见 A4）
+✓ PASS  B10 梯度传到 Query 的 LoRA 与 projection head；Key 侧完全没有梯度
+        （在最后一个 optimizer step 的 zero_grad 之前抓的）
+        有非零梯度的参数 104 个：query LoRA 96 个（lora_A 48 + lora_B 48）、proj_head 4 个、pooler 2 个
+        示例 LoRA A：base_model.model.deberta.encoder.layer.0.attention.self.query_proj.lora_A.q_enc.weight
+                grad_norm=5.754e-06
+        示例 LoRA B：base_model.model.deberta.encoder.layer.0.attention.self.query_proj.lora_B.q_enc.weight
+                grad_norm=2.611e-04
+        示例 proj  ：base_model.model.proj_head.modules_to_save.q_enc.dense.weight
+                grad_norm=1.168e-02
+        key 侧（.k_enc.）带 .grad 的参数 = 0 个（应为 0）
+✓ PASS  B11 保存并重新加载 checkpoint 后，队列 / 指针 / 动量参数逐字节恢复
+        破坏前 ptr=16 valid=24；清零后再 load → ptr=16 valid=24
+        队列特征逐字节相同：True
+        队列标签逐字节相同：True
+        key 参数逐字节相同：True
+        query 参数逐字节相同：True
+✓ PASS  B12 动量分支没有复制整个底座（显存代价可忽略）
+        模型总参数 443,855,238
+        动量副本参数 3,805,314（0.857%，约 14.5 MB fp32）
+        队列 24×128 float32 = 0.01 MB
+        本次训练显存峰值 1.86 GB（len=128/bs=4 的迷你配置，不代表正式实验）
+
+==============================================================================
+C. 三组方法端到端各跑 4 个 optimizer step（bs=4 × accum=2，queue_size=4096）
+==============================================================================
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2709.83 examples/s]
+Map:   0%|          | 0/16 [00:00<?, ? examples/s]Map: 100%|██████████| 16/16 [00:00<00:00, 1780.88 examples/s]
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2926.08 examples/s]
+2026-08-19 05:08:20,330 INFO SCLMoCoTrainer: method=baseline λ=0.2 τ=0.3 m=0.999 include_self_key=True
+/home/ubuntu/miniconda3/lib/python3.13/site-packages/transformers/convert_slow_tokenizer.py:559: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
+  warnings.warn(
+Some weights of DebertaV2ForSequenceClassification were not initialized from the model checkpoint at microsoft/deberta-v3-large and are newly initialized: ['classifier.bias', 'classifier.weight', 'pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2026-08-19 05:08:26,228 INFO 参数量：总计 440,049,924，可训练 3,805,314（0.8647%）
+2026-08-19 05:08:26,230 INFO 已在 DebertaV2Model 上挂 hidden-state hook
+2026-08-19 05:08:27,363 WARNING subset=64：只是冒烟测试，结果不可汇报
+2026-08-19 05:08:27,363 INFO 划分：训练 64 条 / 验证 16 条 / 测试 64 条
+{'train_runtime': 3.2023, 'train_samples_per_second': 14.989, 'train_steps_per_second': 1.874, 'train_loss': 0.6827642122904459, 'epoch': 0.75}
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2732.33 examples/s]
+Map:   0%|          | 0/16 [00:00<?, ? examples/s]Map: 100%|██████████| 16/16 [00:00<00:00, 1719.24 examples/s]
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2935.20 examples/s]
+2026-08-19 05:08:27,506 INFO SCLMoCoTrainer: method=scl λ=0.2 τ=0.3 m=0.999 include_self_key=True
+2026-08-19 05:08:27,995 INFO [scl] micro=1 opt_step=0 ep=0.00 | CE 0.7314  contrast 1.3606  total 1.0036 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0690 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:28,509 INFO [scl] micro=2 opt_step=0 ep=0.00 | CE 0.6616  contrast 1.3728  total 0.9362 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.0604 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:29,032 INFO [scl] micro=3 opt_step=1 ep=0.12 | CE 0.6554  contrast 1.3691  total 0.9292 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0911 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:29,542 INFO [scl] micro=4 opt_step=1 ep=0.12 | CE 0.6949  contrast 1.3095  total 0.9569 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0876 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:30,062 INFO [scl] micro=5 opt_step=2 ep=0.25 | CE 0.7045  contrast 1.3327  total 0.9710 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.0774 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:30,572 INFO [scl] micro=6 opt_step=2 ep=0.25 | CE 0.6504  contrast 1.3387  total 0.9181 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0954 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:31,094 INFO [scl] micro=7 opt_step=3 ep=0.38 | CE 0.7434  contrast 1.3515  total 1.0137 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.1112 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:31,605 INFO [scl] micro=8 opt_step=3 ep=0.38 | CE 0.7900  contrast 1.3470  total 1.0594 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.0950 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:32,126 INFO [scl] micro=9 opt_step=4 ep=0.50 | CE 0.7285  contrast 1.3383  total 0.9961 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.1021 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:32,635 INFO [scl] micro=10 opt_step=4 ep=0.50 | CE 0.4242  contrast 1.3883  total 0.7019 | cand 4  pos 4.0  neg 0.0  skipped 0 | view_gap 0.0842 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:33,154 INFO [scl] micro=11 opt_step=5 ep=0.62 | CE 0.6561  contrast 1.3375  total 0.9236 | cand 4  pos 2.0  neg 2.0  skipped 0 | view_gap 0.1259 | queue valid=0 ptr=0 {} | ema=0
+2026-08-19 05:08:33,664 INFO [scl] micro=12 opt_step=5 ep=0.62 | CE 0.5955  contrast 1.3529  total 0.8661 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.1179 | queue valid=0 ptr=0 {} | ema=0
+/home/ubuntu/miniconda3/lib/python3.13/site-packages/transformers/convert_slow_tokenizer.py:559: UserWarning: The sentencepiece tokenizer that you are converting to a fast tokenizer uses the byte fallback option which is not implemented in the fast tokenizers. In practice this means that the fast version of the tokenizer can produce unknown tokens whereas the sentencepiece version would have converted these unknown tokens into a sequence of byte tokens matching the original piece of text.
+  warnings.warn(
+Some weights of DebertaV2ForSequenceClassification were not initialized from the model checkpoint at microsoft/deberta-v3-large and are newly initialized: ['classifier.bias', 'classifier.weight', 'pooler.dense.bias', 'pooler.dense.weight']
+You should probably TRAIN this model on a down-stream task to be able to use it for predictions and inference.
+2026-08-19 05:08:36,216 INFO 参数量：总计 443,855,238，可训练 3,805,314（0.8573%）
+2026-08-19 05:08:36,217 INFO 已在 DebertaV2Model 上挂 hidden-state hook
+2026-08-19 05:08:36,220 INFO 动量分支：104 组参数对，共 3,805,314 个参数（14.5 MB fp32）
+2026-08-19 05:08:37,357 WARNING subset=64：只是冒烟测试，结果不可汇报
+2026-08-19 05:08:37,358 INFO 划分：训练 64 条 / 验证 16 条 / 测试 64 条
+{'train_runtime': 6.1962, 'train_samples_per_second': 7.747, 'train_steps_per_second': 0.968, 'train_loss': 0.9396519660949707, 'epoch': 0.75}
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2885.44 examples/s]
+Map:   0%|          | 0/16 [00:00<?, ? examples/s]Map: 100%|██████████| 16/16 [00:00<00:00, 1536.62 examples/s]
+Map:   0%|          | 0/64 [00:00<?, ? examples/s]Map: 100%|██████████| 64/64 [00:00<00:00, 2957.25 examples/s]
+2026-08-19 05:08:37,500 INFO SCLMoCoTrainer: method=scl_moco λ=0.2 τ=0.3 m=0.999 include_self_key=True
+2026-08-19 05:08:38,007 INFO [scl_moco] micro=1 opt_step=0 ep=0.00 | CE 0.7314  contrast 1.3606  total 1.0036 | cand 4  pos 2.5  neg 1.5  skipped 0 | view_gap 0.0690 | queue valid=0 ptr=4 {} | ema=0
+2026-08-19 05:08:38,369 INFO [scl_moco] micro=2 opt_step=0 ep=0.00 | CE 0.6616  contrast 2.0713  total 1.0759 | cand 8  pos 4.0  neg 4.0  skipped 0 | view_gap 0.0604 | queue valid=4 ptr=8 {0: 1, 1: 3} | ema=0
+2026-08-19 05:08:38,739 INFO [scl_moco] micro=3 opt_step=1 ep=0.12 | CE 0.6553  contrast 2.4819  total 1.1517 | cand 12  pos 7.0  neg 5.0  skipped 0 | view_gap 0.1620 | queue valid=8 ptr=12 {0: 3, 1: 5} | ema=1
+2026-08-19 05:08:39,088 INFO [scl_moco] micro=4 opt_step=1 ep=0.12 | CE 0.6949  contrast 2.7599  total 1.2469 | cand 16  pos 9.5  neg 6.5  skipped 0 | view_gap 0.1627 | queue valid=12 ptr=16 {0: 4, 1: 8} | ema=1
+2026-08-19 05:08:39,454 INFO [scl_moco] micro=5 opt_step=2 ep=0.25 | CE 0.7047  contrast 2.9789  total 1.3004 | cand 20  pos 10.0  neg 10.0  skipped 0 | view_gap 0.1713 | queue valid=16 ptr=20 {0: 5, 1: 11} | ema=2
+2026-08-19 05:08:39,809 INFO [scl_moco] micro=6 opt_step=2 ep=0.25 | CE 0.6504  contrast 3.1664  total 1.2837 | cand 24  pos 14.0  neg 10.0  skipped 0 | view_gap 0.1751 | queue valid=20 ptr=24 {0: 7, 1: 13} | ema=2
+2026-08-19 05:08:40,172 INFO [scl_moco] micro=7 opt_step=3 ep=0.38 | CE 0.7434  contrast 3.3282  total 1.4091 | cand 28  pos 14.0  neg 14.0  skipped 0 | view_gap 0.2063 | queue valid=24 ptr=28 {0: 8, 1: 16} | ema=3
+2026-08-19 05:08:40,522 INFO [scl_moco] micro=8 opt_step=3 ep=0.38 | CE 0.7900  contrast 3.4590  total 1.4818 | cand 32  pos 16.0  neg 16.0  skipped 0 | view_gap 0.2100 | queue valid=28 ptr=32 {0: 10, 1: 18} | ema=3
+2026-08-19 05:08:40,882 INFO [scl_moco] micro=9 opt_step=4 ep=0.50 | CE 0.7285  contrast 3.5797  total 1.4444 | cand 36  pos 18.0  neg 18.0  skipped 0 | view_gap 0.2216 | queue valid=32 ptr=36 {0: 12, 1: 20} | ema=4
+2026-08-19 05:08:41,230 INFO [scl_moco] micro=10 opt_step=4 ep=0.50 | CE 0.4242  contrast 3.6989  total 1.1639 | cand 40  pos 26.0  neg 14.0  skipped 0 | view_gap 0.2377 | queue valid=36 ptr=40 {0: 14, 1: 22} | ema=4
+2026-08-19 05:08:41,590 INFO [scl_moco] micro=11 opt_step=5 ep=0.62 | CE 0.6562  contrast 3.7813  total 1.4125 | cand 44  pos 22.0  neg 22.0  skipped 0 | view_gap 0.2364 | queue valid=40 ptr=44 {0: 14, 1: 26} | ema=5
+2026-08-19 05:08:41,938 INFO [scl_moco] micro=12 opt_step=5 ep=0.62 | CE 0.5957  contrast 3.8725  total 1.3702 | cand 48  pos 27.5  neg 20.5  skipped 0 | view_gap 0.2416 | queue valid=44 ptr=48 {0: 16, 1: 28} | ema=5
+{'train_runtime': 4.297, 'train_samples_per_second': 11.171, 'train_steps_per_second': 1.396, 'train_loss': 1.278672695159912, 'epoch': 0.75}
+✓ PASS  C1 队列为空时（第 1 个 micro-batch）两组候选数与逐 query 正负划分一致
+        两组吃到的是同一个 batch（CE 相同：0.7314 vs 0.7314，seed/数据顺序一致）
+        SCL     ：候选 4，正 (3, 1, 3, 3)，负 (1, 3, 1, 1)，queue valid=0
+        SCL-MoCo：候选 4，正 (3, 1, 3, 3)，负 (1, 3, 1, 1)，queue valid=0
+✓ PASS  C2 队列填充后只有 SCL-MoCo 的候选数扩大，SCL 原地不动
+        SCL     ：第 1 个 micro-batch 4 → 最后 4（accum=2 也不会变多）
+        SCL-MoCo：第 1 个 micro-batch 4 → 最后 48（queue valid=44，标签分布 {0: 16, 1: 28}）
+✓ PASS  C3 两组都没有任何 query 因缺少正样本被跳过
+        SCL 累计 skip = 0，SCL-MoCo 累计 skip = 0（各 12 个 micro-batch）
+        对照：改动前的单视图 SCL 在同样配置下 8 个 micro-batch 里有 4 个出现 skip=1
+✓ PASS  C4 视图 2 与视图 1 确实不同（否则「配对正样本」是个恒等式，等于没加）
+        SCL      视图距离 ‖v1−v2‖ 均值区间 = [0.0604, 0.1259]（同一在线编码器，dropout 独立重采样）
+        SCL-MoCo 视图距离 ‖q−k‖   均值区间 = [0.0604, 0.2416]（动量编码器 + dropout）
+✓ PASS  C5 baseline 只有 CE，完全不进对比分支
+        baseline 的对比统计记录数 = 0（应为 0）
+
+==============================================================================
+合计 22 项，通过 22 项，失败 0 项
+==============================================================================
